@@ -524,7 +524,7 @@
             }
         });
 
-        const handleFormSubmit = (formElement, btnElement, successElement, emailTarget) => {
+        const handleFormSubmit = (formElement, btnElement, successElement, formspreeEndpoint) => {
             formElement.addEventListener('submit', (e) => {
                 e.preventDefault();
                 
@@ -535,7 +535,7 @@
                 const formData = new FormData(formElement);
                 const data = Object.fromEntries(formData.entries());
 
-                fetch(`https://formsubmit.co/ajax/${emailTarget}`, {
+                fetch(formspreeEndpoint, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -543,11 +543,13 @@
                     },
                     body: JSON.stringify(data)
                 })
-                .then(response => response.json())
-                .then(data => {
-                    successElement.classList.remove('hidden');
-                    formElement.reset();
-                    
+                .then(response => {
+                    if (response.ok) {
+                        successElement.classList.remove('hidden');
+                        formElement.reset();
+                    } else {
+                        alert('There was a problem submitting your form. Please try again.');
+                    }
                     btnElement.innerHTML = originalBtnText;
                     btnElement.disabled = false;
                     
@@ -563,20 +565,20 @@
             });
         };
 
-        const targetEmail = "ashrecycling101@gmail.com";
+        const myEndpoint = "https://formspree.io/f/mljjvoen";
         
         handleFormSubmit(
             document.getElementById('pickupForm'), 
             document.getElementById('booking-submit-btn'), 
             document.getElementById('booking-success'),
-            targetEmail
+            myEndpoint
         );
         
         handleFormSubmit(
             document.getElementById('membershipForm'), 
             document.getElementById('modal-submit-btn'), 
             document.getElementById('modal-success'),
-            targetEmail
+            myEndpoint
         );
     </script>
 </body>
