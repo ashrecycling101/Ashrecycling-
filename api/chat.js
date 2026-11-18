@@ -31,7 +31,6 @@ Key Business Facts:
 - Encourage customers to use the "Book a Pickup" form on the page or click "Apply Now" on a membership card.
 `;
 
-    // Convert frontend chat history format to OpenAI/Ollama format
     const messages = [
         { role: 'system', content: SYSTEM_PROMPT },
         ...contents.map(msg => ({
