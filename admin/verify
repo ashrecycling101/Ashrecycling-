@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Verification Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen p-6 md:p-10">
+    <div class="max-w-6xl mx-auto">
+        <header class="flex justify-between items-center mb-8 pb-4 border-b border-slate-800">
+            <div>
+                <h1 class="text-2xl font-bold text-white">Admin Verification Review</h1>
+                <p class="text-xs text-slate-400">Review uploaded product label stickers against extracted form data.</p>
+            </div>
+            <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-3 py-1 rounded-full text-xs font-semibold">
+                Pending Queue: <span id="queue-count">0</span>
+            </span>
+        </header>
+
+        <!-- Submissions Grid -->
+        <div id="submissions-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Dynamic submission cards get injected here -->
+        </div>
+    </div>
+
+    <script>
+        async function loadSubmissions() {
+            try {
+                const res = await fetch('/api/get-submissions');
+                const data = await res.json();
+                const grid = document.getElementById('submissions-grid');
+                document.getElementById('queue-count').textContent = data.submissions.length;
+
+                if (data.submissions.length === 0) {
+                    grid.innerHTML = '<p class="col-span-2 text-center text-slate-500 py-12">No pending verifications in queue.</p>';
+                    return;
+                }
+
+                grid.innerHTML = data.submissions.map(sub => `
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-xs text-slate-400 font-mono">ID: ${sub.id}</span>
+                                <span class="bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2.5 py-0.5 rounded text-[11px] font-bold uppercase">Pending</span>
+                            </div>
+                            <!-- Side-by-Side View -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                                <div class="bg-slate-950 rounded-xl p-2 border border-slate-800 flex items-center justify-center">
+                                    <img src="${sub.image}" alt="Sticker Photo" class="max-h-40 object-contain rounded">
+                                </div>
+                                <div class="space-y-2 text-sm flex flex-col justify-center">
+                                    <div><strong class="text-slate-400 text-xs block">BRAND:</strong> <span class="text-white font-semibold">${sub.brand}</span></div>
+                                    <div><strong class="text-slate-400 text-xs block">MODEL:</strong> <span class="text-white font-semibold">${sub.model}</span></div>
+                                    <div><strong class="text-slate-400 text-xs block">SERIAL NUMBER:</strong> <span class="text-emerald-400 font-mono font-bold">${sub.serial_number}</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex gap-3 pt-3 border-t border-slate-800">
+                            <button onclick="updateStatus('${sub.id}', 'rejected')" class="flex-1 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 font-semibold py-2.5 rounded-lg text-sm transition">
+                                <i class="ph ph-x mr-1"></i> Reject
+                            </button>
+                            <button onclick="updateStatus('${sub.id}', 'approved')" class="flex-1 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-2.5 rounded-lg text-sm transition shadow">
+                                <i class="ph ph-check mr-1"></i> Approve
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error('Error loading submissions:', err);
+            }
+        }
+
+        async function updateStatus(id, status) {
+            await fetch('/api/update-status', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, status })
+            });
+            loadSubmissions();
+        }
+
+        loadSubmissions();
+    </script>
+</body>
+</html>
