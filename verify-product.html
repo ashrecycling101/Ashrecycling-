@@ -1,10 +1,120 @@
-<script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scan TV Label | Ash Recycling</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        obsidian: '#121812',
+                        charcoal: '#1A1A1A',
+                        neonGreen: '#39FF14',
+                        brightNeon: '#76FF03',
+                        mossGreen: '#2C4A2E',
+                        forestGreen: '#3B5323',
+                        amberGold: '#FFAB00',
+                        steelGray: '#607D8B'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #121812; color: #f8fafc; }
+        .neon-box-glow {
+            box-shadow: 0 0 25px rgba(57, 255, 20, 0.2);
+            border: 1px solid rgba(57, 255, 20, 0.4);
+        }
+    </style>
+</head>
+<body class="antialiased font-sans bg-obsidian text-slate-100 min-h-screen flex flex-col">
+
+    <!-- Navigation -->
+    <nav class="bg-charcoal/95 backdrop-blur-md border-b border-forestGreen/40 sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex justify-between items-center">
+            <a href="/index.html" class="text-2xl font-bold tracking-tighter text-white">
+                ASH <span class="text-neonGreen">Recycling</span>
+            </a>
+            <a href="/index.html" class="text-sm text-gray-300 hover:text-neonGreen transition flex items-center gap-1.5 font-medium">
+                <i class="ph ph-arrow-left"></i> Back to Home
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-2xl w-full mx-auto px-4 py-12">
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-mossGreen/40 text-neonGreen border border-neonGreen/50 text-xs font-bold uppercase tracking-wider mb-3">
+                <i class="ph-fill ph-camera"></i> TV Sticker Verification
+            </div>
+            <h1 class="text-3xl md:text-4xl font-extrabold text-white mb-3">Upload TV Label Photo</h1>
+            <p class="text-gray-400 text-sm max-w-md mx-auto">
+                Snap or upload a photo of your TV sticker, fill in your details, and submit it for verification.
+            </p>
+        </div>
+
+        <div class="bg-charcoal rounded-2xl p-6 md:p-8 border border-steelGray/60 shadow-2xl neon-box-glow">
+            <!-- Photo Upload Box -->
+            <div class="mb-6">
+                <label class="block text-sm font-semibold text-gray-200 mb-2">1. Upload Sticker Photo</label>
+                <label for="sticker-input" class="relative flex flex-col items-center justify-center w-full min-h-[200px] border-2 border-dashed border-neonGreen/50 hover:border-neonGreen rounded-xl bg-obsidian/80 cursor-pointer transition p-4 text-center overflow-hidden">
+                    <input id="sticker-input" type="file" accept="image/*" capture="environment" class="hidden" />
+                    
+                    <div id="upload-placeholder" class="flex flex-col items-center py-6">
+                        <div class="w-14 h-14 rounded-full bg-mossGreen/40 border border-neonGreen/60 flex items-center justify-center text-neonGreen mb-3">
+                            <i class="ph-fill ph-camera text-3xl"></i>
+                        </div>
+                        <span class="text-white font-bold text-base mb-1">Tap to Choose Photo or Take Picture</span>
+                        <span class="text-xs text-gray-400">Supports JPG, PNG</span>
+                    </div>
+
+                    <div id="preview-container" class="hidden w-full flex flex-col items-center">
+                        <img id="sticker-preview" src="" alt="Preview" class="max-h-56 rounded-lg object-contain border border-steelGray shadow-md mb-2" />
+                        <span class="text-xs text-neonGreen font-semibold">Photo loaded successfully! Tap to change.</span>
+                    </div>
+                </label>
+            </div>
+
+            <!-- Verification Form -->
+            <form id="verifyForm" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Brand / Manufacturer</label>
+                    <input type="text" id="brand" name="brand" required placeholder="e.g., Samsung, LG, Sceptre" class="w-full bg-obsidian border border-steelGray rounded-lg px-4 py-3 text-white focus:outline-none focus:border-neonGreen transition">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Model Number</label>
+                    <input type="text" id="model" name="model" required placeholder="e.g., OATV58DB" class="w-full bg-obsidian border border-steelGray rounded-lg px-4 py-3 text-white font-mono focus:outline-none focus:border-neonGreen transition">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Serial Number (S/N)</label>
+                    <input type="text" id="serial_number" name="serial_number" required placeholder="e.g., 08923489123" class="w-full bg-obsidian border border-steelGray rounded-lg px-4 py-3 text-white font-mono focus:outline-none focus:border-neonGreen transition">
+                </div>
+
+                <button type="submit" id="submit-btn" class="w-full bg-neonGreen hover:bg-brightNeon text-obsidian font-bold py-4 px-6 rounded-xl transition mt-4 flex justify-center items-center gap-2 shadow-[0_0_20px_rgba(57,255,20,0.35)]">
+                    Submit for Verification <i class="ph-bold ph-check-circle text-lg"></i>
+                </button>
+            </form>
+
+            <div id="submit-feedback" class="hidden mt-5 p-4 rounded-xl text-sm text-center font-medium border"></div>
+        </div>
+    </main>
+
+    <script>
         const stickerInput = document.getElementById('sticker-input');
         const uploadPlaceholder = document.getElementById('upload-placeholder');
         const previewContainer = document.getElementById('preview-container');
         const stickerPreview = document.getElementById('sticker-preview');
-        const scanStatus = document.getElementById('scan-status');
-        const retryScanBtn = document.getElementById('retry-scan-btn');
 
         const brandInput = document.getElementById('brand');
         const modelInput = document.getElementById('model');
@@ -15,95 +125,14 @@
 
         let compressedBase64Image = '';
 
-        const setStatusBanner = (type, message) => {
-            scanStatus.classList.remove('hidden', 'bg-mossGreen/30', 'border-neonGreen', 'text-neonGreen', 'bg-amberGold/15', 'border-amberGold', 'text-amberGold', 'bg-red-900/30', 'border-red-500', 'text-red-300');
-            if (type === 'loading') {
-                scanStatus.classList.add('bg-mossGreen/30', 'border-neonGreen', 'text-neonGreen');
-                scanStatus.innerHTML = `<i class="ph ph-spinner-gap animate-spin text-xl shrink-0"></i><span>${message}</span>`;
-            } else if (type === 'success') {
-                scanStatus.classList.add('bg-mossGreen/30', 'border-neonGreen', 'text-neonGreen');
-                scanStatus.innerHTML = `<i class="ph-fill ph-check-circle text-xl shrink-0"></i><span>${message}</span>`;
-            } else if (type === 'warning') {
-                scanStatus.classList.add('bg-amberGold/15', 'border-amberGold', 'text-amberGold');
-                scanStatus.innerHTML = `<i class="ph-fill ph-warning-circle text-xl shrink-0"></i><span>${message}</span>`;
-            } else {
-                scanStatus.classList.add('bg-amberGold/15', 'border-amberGold', 'text-amberGold');
-                scanStatus.innerHTML = `<i class="ph-fill ph-info text-xl shrink-0"></i><span>${message}</span>`;
-            }
-        };
-
-        const parseOCRText = (text) => {
-            const upperText = text.toUpperCase();
-            let foundBrand = '';
-            let foundModel = '';
-            let foundSerial = '';
-
-            const knownBrands = ['SCEPTRE', 'SAMSUNG', 'LG', 'SONY', 'VIZIO', 'TCL', 'HISENSE', 'SHARP', 'PANASONIC', 'PHILIPS'];
-            for (const brand of knownBrands) {
-                if (upperText.includes(brand)) {
-                    foundBrand = brand.charAt(0) + brand.slice(1).toLowerCase();
-                    break;
-                }
-            }
-
-            const modelMatch = text.match(/(?:MODEL|M\/N|MODEL NO\.?)\s*[:#-]?\s*([A-Z0-9\-_]{3,25})/i);
-            if (modelMatch && modelMatch[1]) foundModel = modelMatch[1].trim();
-
-            const serialMatch = text.match(/(?:SERIAL|S\/N|S\/NO|NO\.?)\s*[:#-]?\s*([A-Z0-9\-]{5,30})/i);
-            if (serialMatch && serialMatch[1]) foundSerial = serialMatch[1].trim();
-
-            return { brand: foundBrand, model: foundModel, serialNumber: foundSerial };
-        };
-
-        const runTesseractScan = async (imageSrc) => {
-            setStatusBanner('loading', 'Initializing browser scanner...');
-
-            try {
-                // Check if Tesseract loaded correctly from CDN
-                if (typeof Tesseract === 'undefined') {
-                    throw new Error('Tesseract script not loaded');
-                }
-
-                const result = await Tesseract.recognize(
-                    imageSrc,
-                    'eng',
-                    {
-                        logger: m => {
-                            if (m.status === 'recognizing text') {
-                                const percent = Math.round(m.progress * 100);
-                                setStatusBanner('loading', `Reading sticker text (${percent}%)...`);
-                            }
-                        }
-                    }
-                );
-
-                const rawText = result.data.text || '';
-                const extracted = parseOCRText(rawText);
-                let filledCount = 0;
-
-                if (extracted.brand) { brandInput.value = extracted.brand; filledCount++; }
-                if (extracted.model) { modelInput.value = extracted.model; filledCount++; }
-                if (extracted.serialNumber) { serialInput.value = extracted.serialNumber; filledCount++; }
-
-                if (filledCount > 0) {
-                    setStatusBanner('success', 'Scan complete! Please review and fill in any missing fields.');
-                } else {
-                    setStatusBanner('warning', 'Photo processed successfully. Please type in your TV details below.');
-                }
-            } catch (err) {
-                console.warn('OCR Notice:', err);
-                setStatusBanner('warning', 'Photo uploaded successfully! Please enter your TV details below.');
-            }
-        };
-
-        stickerInput.addEventListener('change', async (e) => {
+        stickerInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
 
             const reader = new FileReader();
-            reader.onload = async (event) => {
+            reader.onload = (event) => {
                 const img = new Image();
-                img.onload = async () => {
+                img.onload = () => {
                     const canvas = document.createElement('canvas');
                     const MAX_WIDTH = 1000;
                     let width = img.width;
@@ -123,26 +152,17 @@
                     stickerPreview.src = compressedBase64Image;
                     uploadPlaceholder.classList.add('hidden');
                     previewContainer.classList.remove('hidden');
-                    retryScanBtn.classList.remove('hidden');
-
-                    await runTesseractScan(compressedBase64Image);
                 };
                 img.src = event.target.result;
             };
             reader.readAsDataURL(file);
         });
 
-        retryScanBtn.addEventListener('click', () => {
-            if (compressedBase64Image) {
-                runTesseractScan(compressedBase64Image);
-            }
-        });
-
         verifyForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
             if (!compressedBase64Image) {
-                setStatusBanner('warning', 'Please upload or take a photo of your TV sticker first.');
+                alert('Please upload a photo of your TV sticker first.');
                 return;
             }
 
@@ -172,8 +192,6 @@
                     compressedBase64Image = '';
                     previewContainer.classList.add('hidden');
                     uploadPlaceholder.classList.remove('hidden');
-                    retryScanBtn.classList.add('hidden');
-                    scanStatus.classList.add('hidden');
                 } else {
                     throw new Error(result.error || 'Failed to save verification.');
                 }
@@ -186,3 +204,5 @@
             }
         });
     </script>
+</body>
+</html>
