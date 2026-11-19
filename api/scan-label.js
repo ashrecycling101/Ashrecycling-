@@ -5,7 +5,7 @@ export default async function handler(req, res) {
 
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-        return res.status(500).json({ error: 'GEMINI_API_KEY not configured.' });
+        return res.status(500).json({ error: 'GEMINI_API_KEY not configured in Vercel.' });
     }
 
     const { image } = req.body;
@@ -21,8 +21,15 @@ export default async function handler(req, res) {
     const base64Data = matches[2];
 
     try {
-        const prompt = `Analyze this product TV sticker image carefully. Even if the image is dark or blurry, look closely for the Brand (e.g., Sceptre, Samsung, LG, Sony), Model number, and Serial number. Return ONLY a valid JSON object in this exact format with no markdown formatting:
-{"brand": "...", "model": "...", "serialNumber": "..."}`;
+        const prompt = `Examine this TV back-panel sticker photo carefully, even if it is dimly lit, angled, or slightly blurry.
+Extract:
+1. "brand": The TV manufacturer/brand (e.g., Sceptre, Samsung, LG, Sony, Vizio, TCL, Hisense).
+2. "model": The exact Model Number (often labeled Model, Model No., M/N, or printed inside a white box like OATV58DB).
+3. "serialNumber": The exact Serial Number (often labeled Serial No., S/N, or below a barcode).
+
+If any single field is completely unreadable or missing from the sticker, return "" for that field, while still returning the fields you CAN read.
+Return ONLY valid JSON with no markdown:
+{"brand": "", "model": "", "serialNumber": ""}`;
 
         const response = await fetch(
             `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
@@ -38,7 +45,7 @@ export default async function handler(req, res) {
                     }],
                     generationConfig: {
                         temperature: 0.1,
-                        responseMimeType: "application/json"
+                        responseMimeType: 'application/json'
                     }
                 })
             }
@@ -50,7 +57,8 @@ export default async function handler(req, res) {
         }
 
         const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
-        const extracted = JSON.parse(rawText);
+        const cleanedJson = rawText.replace(/```json|```/g, '').trim();
+        const extracted = JSON.parse(cleanedJson);
 
         return res.status(200).json({ extracted });
     } catch (error) {
