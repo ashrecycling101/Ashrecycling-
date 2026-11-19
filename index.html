@@ -53,6 +53,16 @@
             box-shadow: 0 0 20px rgba(96, 125, 139, 0.4);
             border: 1px solid #607D8B; 
         }
+        #chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+        #chat-messages::-webkit-scrollbar-track {
+            background: #121812;
+        }
+        #chat-messages::-webkit-scrollbar-thumb {
+            background: #3B5323;
+            border-radius: 3px;
+        }
     </style>
 </head>
 <body class="antialiased font-sans bg-obsidian text-slate-100">
@@ -68,11 +78,14 @@
                     <a href="#home" class="text-gray-300 hover:text-neonGreen transition font-medium">Home</a>
                     <a href="#memberships" class="text-gray-300 hover:text-neonGreen transition font-medium">Memberships</a>
                     <a href="#booking" class="text-gray-300 hover:text-neonGreen transition font-medium">Book Pickup</a>
+                    <a href="/verify-product.html" class="text-gray-300 hover:text-neonGreen transition font-medium flex items-center gap-1.5">
+                        <i class="ph-fill ph-camera text-neonGreen"></i> Scan Label
+                    </a>
                     
                     <!-- Separator Line -->
                     <div class="w-px h-5 bg-forestGreen mx-2"></div>
                     
-                    <!-- TekShawn & eBay Icons -->
+                    <!-- TekShawn & eBay Links -->
                     <a href="https://www.tekshawn.com" target="_blank" rel="noopener noreferrer" class="text-gray-300 hover:text-amberGold transition flex items-center gap-1.5" title="TekShawn TV Repair">
                         <i class="ph-fill ph-wrench text-lg"></i> <span class="text-sm font-semibold">TekShawn</span>
                     </a>
@@ -92,6 +105,9 @@
             <a href="#home" class="block px-4 py-3 text-sm text-gray-300 hover:bg-obsidian hover:text-neonGreen">Home</a>
             <a href="#memberships" class="block px-4 py-3 text-sm text-gray-300 hover:bg-obsidian hover:text-neonGreen">Memberships</a>
             <a href="#booking" class="block px-4 py-3 text-sm text-gray-300 hover:bg-obsidian hover:text-neonGreen">Book Pickup</a>
+            <a href="/verify-product.html" class="px-4 py-3 text-sm text-gray-300 hover:bg-obsidian hover:text-neonGreen flex items-center gap-2">
+                <i class="ph-fill ph-camera text-neonGreen"></i> Scan Product Label
+            </a>
             <div class="border-t border-forestGreen/40 my-1"></div>
             <a href="https://www.tekshawn.com" target="_blank" rel="noopener noreferrer" class="px-4 py-3 text-sm text-gray-300 hover:bg-obsidian hover:text-amberGold flex items-center gap-2">
                 <i class="ph-fill ph-wrench text-lg"></i> TekShawn TV Repair
@@ -127,6 +143,9 @@
                 <a href="#booking" class="px-8 py-4 rounded-full bg-neonGreen hover:bg-brightNeon text-obsidian font-bold text-lg transition shadow-[0_0_25px_rgba(57,255,20,0.4)]">
                     Book a Pickup Now
                 </a>
+                <a href="/verify-product.html" class="px-8 py-4 rounded-full bg-charcoal hover:bg-slate-800 text-white font-bold text-lg border border-neonGreen/60 transition flex items-center justify-center gap-2">
+                    <i class="ph-fill ph-camera text-neonGreen"></i> Scan TV Label
+                </a>
                 <a href="#memberships" class="px-8 py-4 rounded-full bg-charcoal hover:bg-slate-800 text-white font-bold text-lg border border-steelGray transition">
                     View Memberships
                 </a>
@@ -145,7 +164,7 @@
             <!-- Program Banner / Graphic Showcase -->
             <div class="mb-16 max-w-4xl mx-auto bg-obsidian rounded-2xl p-4 md:p-6 border border-neonGreen/50 neon-box-glow flex flex-col md:flex-row items-center gap-8">
                 <div class="w-full md:w-1/2 flex justify-center">
-                    <img src="https://i.ibb.co/yFb4ZcMB/Whats-App-Image-2026-11-16-at-11-27-17-AM-1.jpg" alt="Ash Recycling Membership Program" class="rounded-xl max-h-[400px] object-cover shadow-lg border border-steelGray">
+                    <img src="https://i.ibb.co/nNtxNvbT/Whats-App-Image-2026-11-18-at-11-15-42-AM.jpg" alt="Ash Recycling Membership Program" class="rounded-xl max-h-[400px] object-cover shadow-lg border border-steelGray">
                 </div>
                 <div class="w-full md:w-1/2 space-y-4">
                     <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-mossGreen/60 text-neonGreen text-xs font-bold uppercase border border-forestGreen">
@@ -284,6 +303,17 @@
                     <!-- Options Cards -->
                     <div class="mb-10 grid grid-cols-1 gap-5">
                         
+                        <!-- Label Scanner Card -->
+                        <div class="bg-obsidian border border-neonGreen/40 p-6 rounded-xl hover:border-neonGreen transition shadow-lg neon-box-glow">
+                            <h4 class="text-white font-bold mb-2 flex items-center gap-2 text-lg">
+                                <i class="ph-fill ph-camera text-neonGreen text-2xl"></i> Scan Your TV Sticker Label
+                            </h4>
+                            <p class="text-gray-400 text-sm mb-4">Snap a photo of your TV's model and serial number sticker. Our AI reads it automatically for fast verification and parts matching.</p>
+                            <a href="/verify-product.html" class="inline-flex justify-center items-center gap-2 px-5 py-2.5 bg-neonGreen hover:bg-brightNeon text-obsidian font-bold rounded-lg transition text-sm">
+                                Open Label Scanner <i class="ph ph-arrow-right"></i>
+                            </a>
+                        </div>
+
                         <!-- TekShawn Card -->
                         <div class="bg-obsidian border border-amberGold/40 p-6 rounded-xl hover:border-amberGold transition shadow-lg amber-glow">
                             <h4 class="text-white font-bold mb-2 flex items-center gap-2 text-lg">
@@ -395,6 +425,7 @@
                         <li><a href="#home" class="hover:text-neonGreen transition">Home</a></li>
                         <li><a href="#memberships" class="hover:text-neonGreen transition">Memberships</a></li>
                         <li><a href="#booking" class="hover:text-neonGreen transition">Book a Pickup</a></li>
+                        <li><a href="/verify-product.html" class="hover:text-neonGreen transition">Scan TV Label</a></li>
                         <li><a href="https://www.ebay.com/usr/ash-recycling" target="_blank" rel="noopener noreferrer" class="hover:text-neonGreen transition flex items-center gap-1">eBay Store <i class="ph ph-arrow-square-out text-xs"></i></a></li>
                         <li><a href="https://www.tekshawn.com" target="_blank" rel="noopener noreferrer" class="hover:text-amberGold transition flex items-center gap-1">TekShawn TV Repair & Diagnostics <i class="ph ph-arrow-square-out text-xs"></i></a></li>
                     </ul>
@@ -445,7 +476,6 @@
     <!-- Membership Application Modal -->
     <div id="membershipModal" class="fixed inset-0 z-[100] hidden bg-black/80 backdrop-blur-sm items-center justify-center p-4">
         <div class="bg-charcoal w-full max-w-md rounded-2xl border border-steelGray shadow-2xl relative overflow-hidden transform scale-95 transition-transform duration-300" id="modalContent">
-            <!-- Modal Header -->
             <div class="bg-obsidian px-6 py-4 border-b border-forestGreen flex justify-between items-center">
                 <h3 class="text-xl font-bold text-white">Apply for <span id="modalTierName" class="text-neonGreen">Tier</span></h3>
                 <button type="button" id="closeModalBtn" class="text-gray-400 hover:text-white transition">
@@ -453,7 +483,6 @@
                 </button>
             </div>
             
-            <!-- Modal Body -->
             <div class="p-6">
                 <p class="text-sm text-gray-400 mb-6">Please provide your details below. Note that standard pickups are restricted to Ventura County 93004.</p>
                 
@@ -503,6 +532,60 @@
         </div>
     </div>
 
+    <!-- AI CUSTOMER SUPPORT CHAT WIDGET -->
+    <div id="ai-chat-widget" class="fixed bottom-5 right-5 z-[9999] font-sans">
+        <div id="chat-window" class="hidden mb-4 w-[350px] sm:w-[390px] bg-charcoal border border-neonGreen/50 rounded-2xl shadow-2xl overflow-hidden flex flex-col neon-box-glow">
+            <div class="bg-obsidian px-4 py-3.5 border-b border-forestGreen/60 flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-full bg-mossGreen/60 border border-neonGreen flex items-center justify-center text-neonGreen">
+                        <i class="ph-fill ph-sparkle text-lg"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-bold text-white leading-tight">Ash Recycling Assistant</h4>
+                        <span class="text-[11px] text-neonGreen flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-neonGreen animate-pulse"></span> Online • AI Support
+                        </span>
+                    </div>
+                </div>
+                <button id="close-chat-btn" class="text-gray-400 hover:text-white p-1 transition"><i class="ph ph-x text-xl"></i></button>
+            </div>
+            <div id="chat-messages" class="p-4 h-80 overflow-y-auto space-y-3 bg-obsidian/90 text-sm">
+                <div class="flex items-start gap-2.5">
+                    <div class="w-7 h-7 rounded-full bg-mossGreen/60 border border-neonGreen/50 flex items-center justify-center text-neonGreen shrink-0 mt-0.5">
+                        <i class="ph-fill ph-sparkle text-xs"></i>
+                    </div>
+                    <div class="bg-charcoal border border-steelGray/60 text-gray-200 rounded-2xl rounded-tl-none px-3.5 py-2.5 leading-relaxed">
+                        Hi! 👋 Have questions about TV recycling, membership tiers, or Ventura County (93004) pickups? Ask me anything!
+                    </div>
+                </div>
+                <div id="quick-questions" class="flex flex-wrap gap-1.5 pl-9 pt-1">
+                    <button type="button" class="quick-q-btn text-xs bg-mossGreen/30 hover:bg-mossGreen/60 text-neonGreen border border-neonGreen/40 rounded-full px-3 py-1 transition text-left">
+                        Is TV recycling free?
+                    </button>
+                    <button type="button" class="quick-q-btn text-xs bg-mossGreen/30 hover:bg-mossGreen/60 text-neonGreen border border-neonGreen/40 rounded-full px-3 py-1 transition text-left">
+                        Compare membership tiers
+                    </button>
+                    <button type="button" class="quick-q-btn text-xs bg-mossGreen/30 hover:bg-mossGreen/60 text-neonGreen border border-neonGreen/40 rounded-full px-3 py-1 transition text-left">
+                        Do you offer TV repairs?
+                    </button>
+                </div>
+            </div>
+            <form id="ai-chat-form" class="p-3 bg-obsidian border-t border-forestGreen/50 flex items-center gap-2">
+                <input type="text" id="chat-input" placeholder="Ask a question..." autocomplete="off" class="flex-1 bg-charcoal border border-steelGray rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-neonGreen">
+                <button type="submit" class="bg-neonGreen hover:bg-brightNeon text-obsidian font-bold p-2.5 rounded-xl transition"><i class="ph-fill ph-paper-plane-right text-lg"></i></button>
+            </form>
+        </div>
+        <button id="open-chat-btn" class="ml-auto flex items-center gap-2.5 bg-charcoal hover:bg-obsidian text-white border border-neonGreen px-4 py-3 rounded-full shadow-[0_0_20px_rgba(57,255,20,0.35)] transition transform hover:scale-105">
+            <div class="w-8 h-8 rounded-full bg-neonGreen text-obsidian flex items-center justify-center">
+                <i class="ph-fill ph-chat-teardrop-text text-xl"></i>
+            </div>
+            <div class="text-left pr-1">
+                <span class="block text-xs font-bold text-white leading-none">Have Questions?</span>
+                <span class="block text-[10px] text-neonGreen font-medium mt-0.5">Ask AI Assistant</span>
+            </div>
+        </button>
+    </div>
+
     <!-- Interactive JavaScript -->
     <script>
         document.getElementById('year').textContent = new Date().getFullYear();
@@ -520,6 +603,7 @@
             });
         });
 
+        // Membership Modal Logic
         const modal = document.getElementById('membershipModal');
         const modalContent = document.getElementById('modalContent');
         const openBtns = document.querySelectorAll('.open-modal-btn');
@@ -557,17 +641,12 @@
 
         closeBtn.addEventListener('click', closeModal);
         cancelBtn.addEventListener('click', closeModal);
+        modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
 
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                closeModal();
-            }
-        });
-
+        // Formspree Handler
         const handleFormSubmit = (formElement, btnElement, successElement, formspreeEndpoint) => {
             formElement.addEventListener('submit', (e) => {
                 e.preventDefault();
-                
                 const originalBtnText = btnElement.innerHTML;
                 btnElement.innerHTML = '<i class="ph ph-spinner-gap animate-spin text-xl"></i> Sending...';
                 btnElement.disabled = true;
@@ -577,10 +656,7 @@
 
                 fetch(formspreeEndpoint, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                     body: JSON.stringify(data)
                 })
                 .then(response => {
@@ -592,10 +668,7 @@
                     }
                     btnElement.innerHTML = originalBtnText;
                     btnElement.disabled = false;
-                    
-                    setTimeout(() => {
-                        successElement.classList.add('hidden');
-                    }, 6000);
+                    setTimeout(() => { successElement.classList.add('hidden'); }, 6000);
                 })
                 .catch(error => {
                     console.error('Error:', error);
@@ -606,20 +679,96 @@
         };
 
         const myEndpoint = "https://formspree.io/f/mljjvoen";
-        
-        handleFormSubmit(
-            document.getElementById('pickupForm'), 
-            document.getElementById('booking-submit-btn'), 
-            document.getElementById('booking-success'),
-            myEndpoint
-        );
-        
-        handleFormSubmit(
-            document.getElementById('membershipForm'), 
-            document.getElementById('modal-submit-btn'), 
-            document.getElementById('modal-success'),
-            myEndpoint
-        );
+        handleFormSubmit(document.getElementById('pickupForm'), document.getElementById('booking-submit-btn'), document.getElementById('booking-success'), myEndpoint);
+        handleFormSubmit(document.getElementById('membershipForm'), document.getElementById('modal-submit-btn'), document.getElementById('modal-success'), myEndpoint);
+
+        // AI Chat Widget Logic
+        const openChatBtn = document.getElementById('open-chat-btn');
+        const closeChatBtn = document.getElementById('close-chat-btn');
+        const chatWindow = document.getElementById('chat-window');
+        const chatForm = document.getElementById('ai-chat-form');
+        const chatInput = document.getElementById('chat-input');
+        const chatMessages = document.getElementById('chat-messages');
+        const quickQBtns = document.querySelectorAll('.quick-q-btn');
+
+        let chatHistory = [];
+
+        openChatBtn.addEventListener('click', () => {
+            chatWindow.classList.remove('hidden');
+            openChatBtn.classList.add('hidden');
+            chatInput.focus();
+        });
+
+        closeChatBtn.addEventListener('click', () => {
+            chatWindow.classList.add('hidden');
+            openChatBtn.classList.remove('hidden');
+        });
+
+        const getFallbackReply = (question) => {
+            const q = question.toLowerCase();
+            if (q.includes('free') || q.includes('cost') || q.includes('price')) {
+                return "Recycling is **FREE** for members in **Ventura, CA (93004)** for TVs **65 inches and below**! TVs larger than 65 inches or pickups outside 93004 incur a fee.";
+            }
+            if (q.includes('tier') || q.includes('membership') || q.includes('silver') || q.includes('gold') || q.includes('platinum') || q.includes('diamond')) {
+                return "All memberships are free to join (valid 6–12 months):\n• **Silver:** Free recycling (≤65\") & member discounts.\n• **Gold:** Bigger discounts + TV repair discounts.\n• **Platinum:** Exclusively for TekShawn customers outside 93004.\n• **Diamond:** Includes repair services & Move-In Special (services start at $100).";
+            }
+            if (q.includes('repair') || q.includes('broken') || q.includes('tekshawn')) {
+                return "Recycling doesn't include free repairs, but our partner **TekShawn** (tekshawn.com) handles expert TV diagnostics, repairs, and mounting—and Gold/Diamond members get discounts!";
+            }
+            return "For instant assistance with your request, you can fill out the **Booking Request** form on this page or message us directly on WhatsApp at **+1 (805) 396-2780**!";
+        };
+
+        const appendMessage = (text, sender) => {
+            const wrapper = document.createElement('div');
+            wrapper.className = sender === 'user' ? 'flex justify-end' : 'flex items-start gap-2.5';
+            const formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>').replace(/\n/g, '<br>');
+
+            if (sender === 'user') {
+                wrapper.innerHTML = `<div class="bg-neonGreen text-obsidian font-medium rounded-2xl rounded-tr-none px-3.5 py-2.5 max-w-[82%] leading-relaxed shadow" style="word-break: break-word;">${formattedText}</div>`;
+            } else {
+                wrapper.innerHTML = `
+                    <div class="w-7 h-7 rounded-full bg-mossGreen/60 border border-neonGreen/50 flex items-center justify-center text-neonGreen shrink-0 mt-0.5"><i class="ph-fill ph-sparkle text-xs"></i></div>
+                    <div class="bg-charcoal border border-steelGray/60 text-gray-200 rounded-2xl rounded-tl-none px-3.5 py-2.5 max-w-[85%] leading-relaxed" style="word-break: break-word;">${formattedText}</div>
+                `;
+            }
+            chatMessages.appendChild(wrapper);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        };
+
+        const askAI = async (userQuestion) => {
+            appendMessage(userQuestion, 'user');
+            const quickQContainer = document.getElementById('quick-questions');
+            if (quickQContainer) quickQContainer.classList.add('hidden');
+
+            chatHistory.push({ role: "user", parts: [{ text: userQuestion }] });
+
+            try {
+                const res = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: chatHistory })
+                });
+                const data = await res.json();
+                if (res.ok && data.reply) {
+                    chatHistory.push({ role: "model", parts: [{ text: data.reply }] });
+                    appendMessage(data.reply, 'bot');
+                } else {
+                    appendMessage(getFallbackReply(userQuestion), 'bot');
+                }
+            } catch (err) {
+                console.error(err);
+                appendMessage(getFallbackReply(userQuestion), 'bot');
+            }
+        };
+
+        chatForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const q = chatInput.value.trim();
+            if (!q) return;
+            chatInput.value = '';
+            askAI(q);
+        });
+
     </script>
 </body>
 </html>
