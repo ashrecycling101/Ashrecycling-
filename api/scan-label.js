@@ -13,7 +13,6 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'No image provided.' });
     }
 
-    // Extract base64 mime type and raw data
     const matches = image.match(/^data:(image\/[a-zA-Z+-]+);base64,(.+)$/);
     if (!matches) {
         return res.status(400).json({ error: 'Invalid image format.' });
@@ -31,19 +30,12 @@ export default async function handler(req, res) {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    contents: [
-                        {
-                            parts: [
-                                { text: prompt },
-                                {
-                                    inlineData: {
-                                        mimeType: mimeType,
-                                        data: base64Data
-                                    }
-                                }
-                            ]
-                        }
-                    ],
+                    contents: [{
+                        parts: [
+                            { text: prompt },
+                            { inlineData: { mimeType: mimeType, data: base64Data } }
+                        ]
+                    }],
                     generationConfig: {
                         temperature: 0.1,
                         responseMimeType: "application/json"
