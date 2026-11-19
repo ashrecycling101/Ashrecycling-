@@ -3,85 +3,211 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Verification Dashboard</title>
+    <title>Admin Dashboard - TV Sticker Verifications | Ash Recycling</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        obsidian: '#121812',
+                        charcoal: '#1A1A1A',
+                        neonGreen: '#39FF14',
+                        brightNeon: '#76FF03',
+                        mossGreen: '#2C4A2E',
+                        forestGreen: '#3B5323',
+                        amberGold: '#FFAB00',
+                        steelGray: '#607D8B'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #121812; color: #f8fafc; }
+        .neon-box-glow {
+            box-shadow: 0 0 25px rgba(57, 255, 20, 0.2);
+            border: 1px solid rgba(57, 255, 20, 0.4);
+        }
+    </style>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen p-6 md:p-10">
-    <div class="max-w-6xl mx-auto">
-        <header class="flex justify-between items-center mb-8 pb-4 border-b border-slate-800">
-            <div>
-                <h1 class="text-2xl font-bold text-white">Admin Verification Review</h1>
-                <p class="text-xs text-slate-400">Review uploaded product label stickers against extracted form data.</p>
+<body class="antialiased font-sans bg-obsidian text-slate-100 min-h-screen flex flex-col">
+
+    <!-- Navigation -->
+    <nav class="bg-charcoal/95 backdrop-blur-md border-b border-forestGreen/40 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <span class="text-2xl font-bold tracking-tighter text-white">ASH <span class="text-neonGreen">Recycling</span></span>
+                <span class="px-2.5 py-0.5 rounded-full bg-mossGreen/50 text-neonGreen text-xs font-semibold border border-neonGreen/40">Admin Review Panel</span>
             </div>
-            <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-3 py-1 rounded-full text-xs font-semibold">
-                Pending Queue: <span id="queue-count">0</span>
-            </span>
-        </header>
+            <a href="/index.html" class="text-sm text-gray-300 hover:text-neonGreen transition flex items-center gap-1.5 font-medium">
+                <i class="ph ph-house"></i> Home
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-10">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+            <div>
+                <h1 class="text-3xl font-extrabold text-white mb-1">Scanned TV Label Submissions</h1>
+                <p class="text-gray-400 text-sm">Review incoming TV sticker photos and verify their details against your inventory.</p>
+            </div>
+            <button id="refresh-btn" class="px-4 py-2.5 rounded-xl bg-charcoal hover:bg-obsidian border border-neonGreen/50 text-neonGreen font-semibold text-sm transition flex items-center gap-2">
+                <i class="ph ph-arrows-clockwise text-base"></i> Refresh List
+            </button>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loading-state" class="text-center py-20">
+            <i class="ph ph-spinner-gap animate-spin text-4xl text-neonGreen mb-3"></i>
+            <p class="text-gray-400">Loading submissions from database...</p>
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="hidden text-center py-20 bg-charcoal rounded-2xl border border-steelGray/40">
+            <i class="ph ph-tray text-5xl text-gray-500 mb-3"></i>
+            <h3 class="text-lg font-bold text-white mb-1">No Submissions Found</h3>
+            <p class="text-gray-400 text-sm">When customers scan and submit TV labels on the website, they will appear here.</p>
+        </div>
 
         <!-- Submissions Grid -->
-        <div id="submissions-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Dynamic submission cards get injected here -->
+        <div id="submissions-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    </main>
+
+    <!-- Image Modal Lightbox -->
+    <div id="imageModal" class="fixed inset-0 z-[100] hidden bg-black/90 backdrop-blur-md items-center justify-center p-4">
+        <div class="relative max-w-4xl w-full flex flex-col items-center">
+            <button type="button" id="closeModalBtn" class="absolute -top-12 right-0 text-gray-400 hover:text-white transition text-3xl">
+                <i class="ph ph-x"></i>
+            </button>
+            <img id="modalImage" src="" alt="Full Size Sticker" class="max-h-[80vh] rounded-xl object-contain border border-steelGray shadow-2xl">
         </div>
     </div>
 
     <script>
-        async function loadSubmissions() {
+        const loadingState = document.getElementById('loading-state');
+        const emptyState = document.getElementById('empty-state');
+        const submissionsGrid = document.getElementById('submissions-grid');
+        const refreshBtn = document.getElementById('refresh-btn');
+
+        const imageModal = document.getElementById('imageModal');
+        const modalImage = document.getElementById('modalImage');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+
+        const loadSubmissions = async () => {
+            loadingState.classList.remove('hidden');
+            emptyState.classList.add('hidden');
+            submissionsGrid.innerHTML = '';
+
             try {
                 const res = await fetch('/api/get-submissions');
                 const data = await res.json();
-                const grid = document.getElementById('submissions-grid');
-                document.getElementById('queue-count').textContent = data.submissions.length;
 
-                if (data.submissions.length === 0) {
-                    grid.innerHTML = '<p class="col-span-2 text-center text-slate-500 py-12">No pending verifications in queue.</p>';
+                if (!res.ok) throw new Error(data.error || 'Failed to load submissions.');
+
+                const submissions = data.submissions || [];
+                loadingState.classList.add('hidden');
+
+                if (submissions.length === 0) {
+                    emptyState.classList.remove('hidden');
                     return;
                 }
 
-                grid.innerHTML = data.submissions.map(sub => `
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col justify-between">
-                        <div>
-                            <div class="flex justify-between items-center mb-4">
-                                <span class="text-xs text-slate-400 font-mono">ID: ${sub.id}</span>
-                                <span class="bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2.5 py-0.5 rounded text-[11px] font-bold uppercase">Pending</span>
+                submissions.forEach(sub => {
+                    const card = document.createElement('div');
+                    card.className = 'bg-charcoal rounded-2xl border border-steelGray/60 overflow-hidden flex flex-col shadow-xl transition hover:border-neonGreen/50';
+
+                    let badgeColor = 'bg-amberGold/20 text-amberGold border-amberGold/40';
+                    if (sub.status === 'approved') badgeColor = 'bg-mossGreen/40 text-neonGreen border-neonGreen/50';
+                    if (sub.status === 'rejected') badgeColor = 'bg-red-900/30 text-red-300 border-red-500/40';
+
+                    card.innerHTML = `
+                        <div class="relative h-48 bg-obsidian cursor-pointer overflow-hidden border-b border-steelGray/40 group" onclick="openLightbox('${sub.image_url}')">
+                            <img src="${sub.image_url}" alt="TV Sticker" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-sm font-semibold gap-1.5">
+                                <i class="ph ph-magnifying-glass-plus text-lg"></i> Click to Zoom
                             </div>
-                            <!-- Side-by-Side View -->
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                                <div class="bg-slate-950 rounded-xl p-2 border border-slate-800 flex items-center justify-center">
-                                    <img src="${sub.image}" alt="Sticker Photo" class="max-h-40 object-contain rounded">
+                            <span class="absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-bold uppercase border ${badgeColor}">
+                                ${sub.status}
+                            </span>
+                        </div>
+                        <div class="p-5 flex-1 flex flex-col justify-between space-y-4">
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between border-b border-forestGreen/30 pb-1.5">
+                                    <span class="text-gray-400">Brand:</span>
+                                    <span class="font-bold text-white">${sub.brand || 'Unknown'}</span>
                                 </div>
-                                <div class="space-y-2 text-sm flex flex-col justify-center">
-                                    <div><strong class="text-slate-400 text-xs block">BRAND:</strong> <span class="text-white font-semibold">${sub.brand}</span></div>
-                                    <div><strong class="text-slate-400 text-xs block">MODEL:</strong> <span class="text-white font-semibold">${sub.model}</span></div>
-                                    <div><strong class="text-slate-400 text-xs block">SERIAL NUMBER:</strong> <span class="text-emerald-400 font-mono font-bold">${sub.serial_number}</span></div>
+                                <div class="flex justify-between border-b border-forestGreen/30 pb-1.5">
+                                    <span class="text-gray-400">Model:</span>
+                                    <span class="font-mono text-neonGreen font-semibold">${sub.model || 'Unknown'}</span>
                                 </div>
+                                <div class="flex justify-between border-b border-forestGreen/30 pb-1.5">
+                                    <span class="text-gray-400">Serial Number:</span>
+                                    <span class="font-mono text-amberGold font-semibold">${sub.serial_number || 'Unknown'}</span>
+                                </div>
+                                <div class="text-[11px] text-gray-500 pt-1">
+                                    Submitted: ${new Date(sub.created_at).toLocaleString()}
+                                </div>
+                            </div>
+                            <div class="flex gap-2 pt-2">
+                                <button onclick="updateStatus('${sub._id}', 'approved')" class="flex-1 py-2 bg-mossGreen/50 hover:bg-mossGreen text-neonGreen border border-neonGreen/40 rounded-xl font-semibold text-xs transition flex items-center justify-center gap-1">
+                                    <i class="ph-bold ph-check"></i> Approve
+                                </button>
+                                <button onclick="updateStatus('${sub._id}', 'rejected')" class="flex-1 py-2 bg-red-950/50 hover:bg-red-900 text-red-300 border border-red-500/40 rounded-xl font-semibold text-xs transition flex items-center justify-center gap-1">
+                                    <i class="ph-bold ph-x"></i> Reject
+                                </button>
                             </div>
                         </div>
-                        <div class="flex gap-3 pt-3 border-t border-slate-800">
-                            <button onclick="updateStatus('${sub.id}', 'rejected')" class="flex-1 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 font-semibold py-2.5 rounded-lg text-sm transition">
-                                <i class="ph ph-x mr-1"></i> Reject
-                            </button>
-                            <button onclick="updateStatus('${sub.id}', 'approved')" class="flex-1 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-2.5 rounded-lg text-sm transition shadow">
-                                <i class="ph ph-check mr-1"></i> Approve
-                            </button>
-                        </div>
-                    </div>
-                `).join('');
+                    `;
+                    submissionsGrid.appendChild(card);
+                });
+
             } catch (err) {
-                console.error('Error loading submissions:', err);
+                console.error(err);
+                loadingState.innerHTML = `<p class="text-red-400">Failed to load submissions. Please try refreshing.</p>`;
             }
-        }
+        };
 
-        async function updateStatus(id, status) {
-            await fetch('/api/update-status', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id, status })
-            });
-            loadSubmissions();
-        }
+        const updateStatus = async (id, status) => {
+            try {
+                const res = await fetch('/api/update-status', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id, status })
+                });
+                if (res.ok) {
+                    loadSubmissions();
+                } else {
+                    alert('Failed to update status.');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Connection error while updating status.');
+            }
+        };
 
+        const openLightbox = (url) => {
+            modalImage.src = url;
+            imageModal.classList.remove('hidden');
+            imageModal.classList.add('flex');
+        };
+
+        const closeLightbox = () => {
+            imageModal.classList.add('hidden');
+            imageModal.classList.remove('flex');
+        };
+
+        closeModalBtn.addEventListener('click', closeLightbox);
+        imageModal.addEventListener('click', (e) => { if (e.target === imageModal) closeLightbox(); });
+        refreshBtn.addEventListener('click', loadSubmissions);
+
+        // Load on startup
         loadSubmissions();
     </script>
 </body>
