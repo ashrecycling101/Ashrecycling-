@@ -3,154 +3,310 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product Label Verification | Scan & Submit</title>
+    <title>Scan TV Label | Ash Recycling</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        obsidian: '#121812',
+                        charcoal: '#1A1A1A',
+                        neonGreen: '#39FF14',
+                        brightNeon: '#76FF03',
+                        mossGreen: '#2C4A2E',
+                        forestGreen: '#3B5323',
+                        amberGold: '#FFAB00',
+                        steelGray: '#607D8B'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #121812; color: #f8fafc; }
+        .neon-box-glow {
+            box-shadow: 0 0 25px rgba(57, 255, 20, 0.2);
+            border: 1px solid rgba(57, 255, 20, 0.4);
+        }
+    </style>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen py-12 px-4">
-    <div class="max-w-2xl mx-auto bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl">
-        
-        <!-- Header -->
+<body class="antialiased font-sans bg-obsidian text-slate-100 min-h-screen flex flex-col">
+
+    <!-- Navigation -->
+    <nav class="bg-charcoal/95 backdrop-blur-md border-b border-forestGreen/40 sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex justify-between items-center">
+            <a href="/index.html" class="text-2xl font-bold tracking-tighter text-white">
+                ASH <span class="text-neonGreen">Recycling</span>
+            </a>
+            <a href="/index.html" class="text-sm text-gray-300 hover:text-neonGreen transition flex items-center gap-1.5 font-medium">
+                <i class="ph ph-arrow-left"></i> Back to Home
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Scanner Container -->
+    <main class="flex-1 max-w-2xl w-full mx-auto px-4 py-12">
         <div class="text-center mb-8">
-            <h1 class="text-2xl md:text-3xl font-bold tracking-tight text-white mb-2">Product Label Scanner</h1>
-            <p class="text-slate-400 text-sm">Upload or take a photo of your TV or appliance model/serial sticker to auto-fill details.</p>
+            <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-mossGreen/40 text-neonGreen border border-neonGreen/50 text-xs font-bold uppercase tracking-wider mb-3">
+                <i class="ph-fill ph-sparkle"></i> AI Label Scanner
+            </div>
+            <h1 class="text-3xl md:text-4xl font-extrabold text-white mb-3">Verify Your TV Sticker</h1>
+            <p class="text-gray-400 text-sm max-w-md mx-auto">
+                Take a clear, well-lit photo of the sticker on the back of your TV. Our AI will automatically read the Brand, Model, and Serial Number.
+            </p>
         </div>
 
-        <!-- Upload Box -->
-        <div class="mb-8">
-            <label class="block text-sm font-medium text-slate-300 mb-2">Upload or Take Photo of Sticker</label>
-            <div id="drop-zone" class="border-2 border-dashed border-slate-700 hover:border-emerald-500 rounded-xl p-6 text-center cursor-pointer transition bg-slate-950/50 relative overflow-hidden">
-                <input type="file" id="image-input" accept="image/*" capture="environment" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10">
-                <div id="upload-prompt" class="space-y-3">
-                    <div class="w-12 h-12 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center mx-auto border border-emerald-500/30">
-                        <i class="ph ph-camera text-2xl"></i>
+        <div class="bg-charcoal rounded-2xl p-6 md:p-8 border border-steelGray/60 shadow-2xl neon-box-glow">
+            <!-- Photo Upload Box -->
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-2">
+                    <label class="block text-sm font-semibold text-gray-200">1. Upload or Take Photo of Sticker</label>
+                    <button type="button" id="retry-scan-btn" class="hidden text-xs text-neonGreen hover:underline flex items-center gap-1">
+                        <i class="ph ph-arrows-clockwise"></i> Re-scan Photo
+                    </button>
+                </div>
+
+                <label for="sticker-input" id="dropzone" class="relative flex flex-col items-center justify-center w-full min-h-[220px] border-2 border-dashed border-neonGreen/50 hover:border-neonGreen rounded-xl bg-obsidian/80 cursor-pointer transition p-4 text-center overflow-hidden">
+                    <input id="sticker-input" type="file" accept="image/*" capture="environment" class="hidden" />
+                    
+                    <!-- Default Placeholder -->
+                    <div id="upload-placeholder" class="flex flex-col items-center py-6">
+                        <div class="w-14 h-14 rounded-full bg-mossGreen/40 border border-neonGreen/60 flex items-center justify-center text-neonGreen mb-3">
+                            <i class="ph-fill ph-camera text-3xl"></i>
+                        </div>
+                        <span class="text-white font-bold text-base mb-1">Tap to Open Camera or Choose Photo</span>
+                        <span class="text-xs text-gray-400">Tip: Turn on flash or use bright lighting for best results</span>
                     </div>
-                    <p class="text-sm font-medium text-slate-300">Tap to take photo or upload image</p>
-                    <p class="text-xs text-slate-500">Supports JPG, PNG, WEBP (Barcode & text OCR enabled)</p>
-                </div>
-                <!-- Image Preview Container -->
-                <div id="preview-container" class="hidden relative z-20 flex flex-col items-center">
-                    <img id="image-preview" src="" alt="Sticker Preview" class="max-h-48 rounded-lg shadow border border-slate-700 mb-3 object-contain">
-                    <span class="text-xs text-emerald-400 font-medium bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/30">
-                        <i class="ph ph-check-circle align-middle mr-1"></i> Photo ready for scanning
-                    </span>
-                </div>
+
+                    <!-- Image Preview -->
+                    <div id="preview-container" class="hidden w-full flex flex-col items-center">
+                        <img id="sticker-preview" src="" alt="TV Sticker Preview" class="max-h-64 rounded-lg object-contain border border-steelGray shadow-md mb-3" />
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-mossGreen/50 text-neonGreen text-xs font-semibold border border-neonGreen/40">
+                            <i class="ph-fill ph-camera-rotate"></i> Tap photo to retake or change
+                        </span>
+                    </div>
+                </label>
             </div>
-            <!-- Scanning Spinner -->
-            <div id="scanning-indicator" class="hidden mt-3 text-center text-sm text-emerald-400 flex items-center justify-center gap-2">
-                <i class="ph ph-spinner animate-spin text-lg"></i> AI is scanning label and extracting text...
-            </div>
+
+            <!-- Inline AI Scan Status Banner -->
+            <div id="scan-status" class="hidden mb-6 p-3.5 rounded-xl text-sm flex items-center gap-3 border"></div>
+
+            <!-- Verification Form -->
+            <form id="verifyForm" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Brand / Manufacturer</label>
+                    <input type="text" id="brand" name="brand" required placeholder="e.g., Samsung, LG, Sceptre, Sony" class="w-full bg-obsidian border border-steelGray rounded-lg px-4 py-3 text-white focus:outline-none focus:border-neonGreen focus:ring-1 focus:ring-neonGreen transition">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Model Number</label>
+                    <input type="text" id="model" name="model" required placeholder="e.g., OATV58DB, UN55TU7000" class="w-full bg-obsidian border border-steelGray rounded-lg px-4 py-3 text-white font-mono focus:outline-none focus:border-neonGreen focus:ring-1 focus:ring-neonGreen transition">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Serial Number (S/N)</label>
+                    <input type="text" id="serial_number" name="serial_number" required placeholder="e.g., 08923489123" class="w-full bg-obsidian border border-steelGray rounded-lg px-4 py-3 text-white font-mono focus:outline-none focus:border-neonGreen focus:ring-1 focus:ring-neonGreen transition">
+                </div>
+
+                <button type="submit" id="submit-btn" class="w-full bg-neonGreen hover:bg-brightNeon text-obsidian font-bold py-4 px-6 rounded-xl transition mt-4 flex justify-center items-center gap-2 shadow-[0_0_20px_rgba(57,255,20,0.35)]">
+                    Submit for Verification <i class="ph-bold ph-check-circle text-lg"></i>
+                </button>
+            </form>
+
+            <!-- Submission Feedback -->
+            <div id="submit-feedback" class="hidden mt-5 p-4 rounded-xl text-sm text-center font-medium border"></div>
         </div>
-
-        <!-- Auto-Filled Form -->
-        <form id="verification-form" class="space-y-5">
-            <div>
-                <label class="block text-sm font-medium text-slate-300 mb-1">Brand</label>
-                <input type="text" id="brand" name="brand" required class="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition" placeholder="e.g., Samsung, LG, Onn">
-            </div>
-
-            <div>
-                <label class="block text-sm font-medium text-slate-300 mb-1">Model Number</label>
-                <input type="text" id="model" name="model" required class="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition" placeholder="e.g., 100044717">
-            </div>
-
-            <div>
-                <label class="block text-sm font-medium text-slate-300 mb-1">Serial Number</label>
-                <input type="text" id="serial_number" name="serial_number" required class="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition" placeholder="e.g., FD240862V75000400">
-            </div>
-
-            <button type="submit" id="submit-btn" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-4 rounded-lg transition shadow-lg flex items-center justify-center gap-2">
-                Submit for Verification <i class="ph ph-paper-plane-right text-lg"></i>
-            </button>
-            
-            <div id="form-success" class="hidden bg-emerald-500/10 border border-emerald-500/40 text-emerald-400 p-4 rounded-lg text-center font-medium mt-4">
-                <i class="ph ph-check-circle text-xl align-middle mr-1"></i> Submission sent successfully for admin review!
-            </div>
-        </form>
-    </div>
+    </main>
 
     <script>
-        const imageInput = document.getElementById('image-input');
-        const uploadPrompt = document.getElementById('upload-prompt');
+        const stickerInput = document.getElementById('sticker-input');
+        const uploadPlaceholder = document.getElementById('upload-placeholder');
         const previewContainer = document.getElementById('preview-container');
-        const imagePreview = document.getElementById('image-preview');
-        const scanningIndicator = document.getElementById('scanning-indicator');
-        const verificationForm = document.getElementById('verification-form');
+        const stickerPreview = document.getElementById('sticker-preview');
+        const scanStatus = document.getElementById('scan-status');
+        const retryScanBtn = document.getElementById('retry-scan-btn');
 
-        let base64Image = '';
+        const brandInput = document.getElementById('brand');
+        const modelInput = document.getElementById('model');
+        const serialInput = document.getElementById('serial_number');
+        const verifyForm = document.getElementById('verifyForm');
+        const submitBtn = document.getElementById('submit-btn');
+        const submitFeedback = document.getElementById('submit-feedback');
 
-        imageInput.addEventListener('change', async (e) => {
+        let compressedBase64Image = '';
+
+        // Compress & slightly brighten dark sticker photos on Canvas
+        const processImage = (file) => {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const MAX_WIDTH = 1200;
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > MAX_WIDTH) {
+                            height = Math.round((height * MAX_WIDTH) / width);
+                            width = MAX_WIDTH;
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        // Boost contrast & brightness slightly to help AI read dark TV stickers
+                        ctx.filter = 'contrast(1.12) brightness(1.08)';
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        resolve(canvas.toDataURL('image/jpeg', 0.85));
+                    };
+                    img.onerror = reject;
+                    img.src = e.target.result;
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        };
+
+        const setStatusBanner = (type, message) => {
+            scanStatus.classList.remove('hidden', 'bg-mossGreen/30', 'border-neonGreen', 'text-neonGreen', 'bg-amberGold/15', 'border-amberGold', 'text-amberGold', 'bg-red-900/30', 'border-red-500', 'text-red-300');
+            if (type === 'loading') {
+                scanStatus.classList.add('bg-mossGreen/30', 'border-neonGreen', 'text-neonGreen');
+                scanStatus.innerHTML = `<i class="ph ph-spinner-gap animate-spin text-xl shrink-0"></i><span>${message}</span>`;
+            } else if (type === 'success') {
+                scanStatus.classList.add('bg-mossGreen/30', 'border-neonGreen', 'text-neonGreen');
+                scanStatus.innerHTML = `<i class="ph-fill ph-check-circle text-xl shrink-0"></i><span>${message}</span>`;
+            } else if (type === 'warning') {
+                scanStatus.classList.add('bg-amberGold/15', 'border-amberGold', 'text-amberGold');
+                scanStatus.innerHTML = `<i class="ph-fill ph-warning-circle text-xl shrink-0"></i><span>${message}</span>`;
+            } else {
+                scanStatus.classList.add('bg-red-900/30', 'border-red-500', 'text-red-300');
+                scanStatus.innerHTML = `<i class="ph-fill ph-x-circle text-xl shrink-0"></i><span>${message}</span>`;
+            }
+        };
+
+        const runAIScan = async (base64Img) => {
+            if (!base64Img) return;
+            setStatusBanner('loading', 'AI is scanning label and extracting text...');
+
+            try {
+                const response = await fetch('/api/scan-label', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image: base64Img })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    setStatusBanner('error', data.error || 'Scanner error. Please fill in the fields manually.');
+                    return;
+                }
+
+                const extracted = data.extracted || {};
+                let foundCount = 0;
+
+                if (extracted.brand && extracted.brand !== 'Unknown' && extracted.brand !== '...') {
+                    brandInput.value = extracted.brand;
+                    foundCount++;
+                }
+                if (extracted.model && extracted.model !== 'Unknown' && extracted.model !== '...') {
+                    modelInput.value = extracted.model;
+                    foundCount++;
+                }
+                if (extracted.serialNumber && extracted.serialNumber !== 'Unknown' && extracted.serialNumber !== '...') {
+                    serialInput.value = extracted.serialNumber;
+                    foundCount++;
+                }
+
+                if (foundCount === 3) {
+                    setStatusBanner('success', 'Details extracted! Please verify the numbers below before submitting.');
+                } else if (foundCount > 0) {
+                    setStatusBanner('warning', 'Partial details detected. Please complete any missing fields manually.');
+                } else {
+                    setStatusBanner('warning', 'Photo was too dark or blurry to read automatically. Try retaking with flash or enter details below.');
+                }
+            } catch (err) {
+                console.error(err);
+                setStatusBanner('error', 'Connection error while scanning. Please enter details manually.');
+            }
+        };
+
+        stickerInput.addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
 
-            const reader = new FileReader();
-            reader.onload = async (uploadEvent) => {
-                base64Image = uploadEvent.target.result;
-                imagePreview.src = base64Image;
-                uploadPrompt.classList.add('hidden');
+            try {
+                compressedBase64Image = await processImage(file);
+                stickerPreview.src = compressedBase64Image;
+                uploadPlaceholder.classList.add('hidden');
                 previewContainer.classList.remove('hidden');
+                retryScanBtn.classList.remove('hidden');
 
-                // Automatically trigger AI OCR Extraction
-                scanningIndicator.classList.remove('hidden');
-                try {
-                    const response = await fetch('/api/scan-label', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ image: base64Image })
-                    });
-                    const data = await response.json();
-                    scanningIndicator.classList.add('hidden');
-
-                    if (response.ok && data.extracted) {
-                        document.getElementById('brand').value = data.extracted.brand || '';
-                        document.getElementById('model').value = data.extracted.model || '';
-                        document.getElementById('serial_number').value = data.extracted.serialNumber || '';
-                    } else {
-                        alert('Could not auto-detect details clearly. Please fill them in manually.');
-                    }
-                } catch (err) {
-                    console.error('Scan error:', err);
-                    scanningIndicator.classList.add('hidden');
-                    alert('Error processing image. Please fill in details manually.');
-                }
-            };
-            reader.readAsDataURL(file);
+                await runAIScan(compressedBase64Image);
+            } catch (err) {
+                console.error('Image processing failed:', err);
+                setStatusBanner('error', 'Could not read image file. Please try another photo.');
+            }
         });
 
-        verificationForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const submitBtn = document.getElementById('submit-btn');
-            submitBtn.textContent = 'Submitting...';
-            submitBtn.disabled = true;
+        retryScanBtn.addEventListener('click', () => {
+            if (compressedBase64Image) {
+                runAIScan(compressedBase64Image);
+            }
+        });
 
-            const payload = {
-                brand: document.getElementById('brand').value,
-                model: document.getElementById('model').value,
-                serial_number: document.getElementById('serial_number').value,
-                image: base64Image
-            };
+        // Submit Verification Form to MongoDB
+        verifyForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!compressedBase64Image) {
+                setStatusBanner('warning', 'Please upload or take a photo of your TV sticker first.');
+                return;
+            }
+
+            const originalBtnHtml = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="ph ph-spinner-gap animate-spin text-xl"></i> Saving Verification...';
+            submitFeedback.classList.add('hidden');
 
             try {
                 const res = await fetch('/api/submit-verification', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify({
+                        brand: brandInput.value.trim(),
+                        model: modelInput.value.trim(),
+                        serial_number: serialInput.value.trim(),
+                        image: compressedBase64Image
+                    })
                 });
 
-                if (res.ok) {
-                    document.getElementById('form-success').classList.remove('hidden');
-                    verificationForm.reset();
+                const result = await res.json();
+
+                if (res.ok && result.success) {
+                    submitFeedback.className = 'mt-5 p-4 rounded-xl text-sm text-center font-medium border bg-mossGreen/30 border-neonGreen text-neonGreen';
+                    submitFeedback.innerHTML = '<i class="ph-fill ph-check-circle text-lg align-middle mr-1"></i> TV label submitted and saved for verification!';
+                    verifyForm.reset();
+                    compressedBase64Image = '';
                     previewContainer.classList.add('hidden');
-                    uploadPrompt.classList.remove('hidden');
+                    uploadPlaceholder.classList.remove('hidden');
+                    retryScanBtn.classList.add('hidden');
+                    scanStatus.classList.add('hidden');
                 } else {
-                    alert('Submission failed. Please try again.');
+                    throw new Error(result.error || 'Failed to save verification.');
                 }
             } catch (err) {
-                console.error(err);
+                submitFeedback.className = 'mt-5 p-4 rounded-xl text-sm text-center font-medium border bg-red-900/30 border-red-500 text-red-300';
+                submitFeedback.textContent = err.message || 'Submission failed. Please try again.';
             } finally {
-                submitBtn.textContent = 'Submit for Verification';
                 submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnHtml;
             }
         });
     </script>
