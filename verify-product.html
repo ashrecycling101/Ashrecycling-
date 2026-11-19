@@ -4,9 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scan TV Label | Ash Recycling</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Tesseract.js OCR Library -->
+    <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
     <script>
         tailwind.config = {
             theme: {
@@ -52,11 +56,11 @@
     <main class="flex-1 max-w-2xl w-full mx-auto px-4 py-12">
         <div class="text-center mb-8">
             <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-mossGreen/40 text-neonGreen border border-neonGreen/50 text-xs font-bold uppercase tracking-wider mb-3">
-                <i class="ph-fill ph-sparkle"></i> AI Label Scanner
+                <i class="ph-fill ph-scan"></i> Browser OCR Scanner
             </div>
             <h1 class="text-3xl md:text-4xl font-extrabold text-white mb-3">Verify Your TV Sticker</h1>
             <p class="text-gray-400 text-sm max-w-md mx-auto">
-                Take a clear, well-lit photo of the sticker on the back of your TV. Our AI will automatically read the Brand, Model, and Serial Number.
+                Snap or upload a photo of your TV sticker. Our local browser scanner will read the text instantly without needing any API keys.
             </p>
         </div>
 
@@ -79,7 +83,7 @@
                             <i class="ph-fill ph-camera text-3xl"></i>
                         </div>
                         <span class="text-white font-bold text-base mb-1">Tap to Open Camera or Choose Photo</span>
-                        <span class="text-xs text-gray-400">Tip: Turn on flash or use bright lighting for best results</span>
+                        <span class="text-xs text-gray-400">Processed 100% securely on your device</span>
                     </div>
 
                     <!-- Image Preview -->
@@ -92,7 +96,7 @@
                 </label>
             </div>
 
-            <!-- Inline AI Scan Status Banner -->
+            <!-- Inline OCR Scan Status Banner -->
             <div id="scan-status" class="hidden mb-6 p-3.5 rounded-xl text-sm flex items-center gap-3 border"></div>
 
             <!-- Verification Form -->
@@ -139,40 +143,6 @@
 
         let compressedBase64Image = '';
 
-        // Compress & slightly brighten dark sticker photos on Canvas
-        const processImage = (file) => {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const img = new Image();
-                    img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        const MAX_WIDTH = 1200;
-                        let width = img.width;
-                        let height = img.height;
-
-                        if (width > MAX_WIDTH) {
-                            height = Math.round((height * MAX_WIDTH) / width);
-                            width = MAX_WIDTH;
-                        }
-
-                        canvas.width = width;
-                        canvas.height = height;
-                        const ctx = canvas.getContext('2d');
-                        // Boost contrast & brightness slightly to help AI read dark TV stickers
-                        ctx.filter = 'contrast(1.12) brightness(1.08)';
-                        ctx.drawImage(img, 0, 0, width, height);
-
-                        resolve(canvas.toDataURL('image/jpeg', 0.85));
-                    };
-                    img.onerror = reject;
-                    img.src = e.target.result;
-                };
-                reader.onerror = reject;
-                reader.readAsDataURL(file);
-            });
-        };
-
         const setStatusBanner = (type, message) => {
             scanStatus.classList.remove('hidden', 'bg-mossGreen/30', 'border-neonGreen', 'text-neonGreen', 'bg-amberGold/15', 'border-amberGold', 'text-amberGold', 'bg-red-900/30', 'border-red-500', 'text-red-300');
             if (type === 'loading') {
@@ -190,125 +160,84 @@
             }
         };
 
-        const runAIScan = async (base64Img) => {
-            if (!base64Img) return;
-            setStatusBanner('loading', 'AI is scanning label and extracting text...');
+        // Parse OCR Text with Smart Regular Expressions
+        const parseOCRText = (text) => {
+            const upperText = text.toUpperCase();
+            let foundBrand = '';
+            let foundModel = '';
+            let foundSerial = '';
+
+            // Detect Brand
+            const knownBrands = ['SCEPTRE', 'SAMSUNG', 'LG', 'SONY', 'VIZIO', 'TCL', 'HISENSE', 'SHARP', 'PANASONIC', 'PHILIPS'];
+            for (const brand of knownBrands) {
+                if (upperText.includes(brand)) {
+                    foundBrand = brand.charAt(0) + brand.slice(1).toLowerCase();
+                    break;
+                }
+            }
+
+            // Look for Model patterns (Model, M/N)
+            const modelMatch = text.match(/(?:MODEL|M\/N|MODEL NO\.?)\s*[:#-]?\s*([A-Z0-9\-_]{3,25})/i);
+            if (modelMatch && modelMatch[1]) {
+                foundModel = modelMatch[1].trim();
+            }
+
+            // Look for Serial Number patterns (Serial, S/N, S/NO)
+            const serialMatch = text.match(/(?:SERIAL|S\/N|S\/NO|NO\.?)\s*[:#-]?\s*([A-Z0-9\-]{5,30})/i);
+            if (serialMatch && serialMatch[1]) {
+                foundSerial = serialMatch[1].trim();
+            }
+
+            return { brand: foundBrand, model: foundModel, serialNumber: foundSerial };
+        };
+
+        const runTesseractScan = async (imageSrc) => {
+            setStatusBanner('loading', 'Reading sticker text locally in browser (0%)...');
 
             try {
-                const response = await fetch('/api/scan-label', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ image: base64Img })
-                });
+                const result = await Tesseract.recognize(
+                    imageSrc,
+                    'eng',
+                    {
+                        logger: m => {
+                            if (m.status === 'recognizing text') {
+                                const percent = Math.round(m.progress * 100);
+                                setStatusBanner('loading', `Reading sticker text locally in browser (${percent}%)...`);
+                            }
+                        }
+                    }
+                );
 
-                const data = await response.json();
+                const rawText = result.data.text || '';
+                console.log('Tesseract OCR Output:', rawText);
 
-                if (!response.ok) {
-                    setStatusBanner('error', data.error || 'Scanner error. Please fill in the fields manually.');
-                    return;
-                }
+                const extracted = parseOCRText(rawText);
+                let filledCount = 0;
 
-                const extracted = data.extracted || {};
-                let foundCount = 0;
-
-                if (extracted.brand && extracted.brand !== 'Unknown' && extracted.brand !== '...') {
+                if (extracted.brand) {
                     brandInput.value = extracted.brand;
-                    foundCount++;
+                    filledCount++;
                 }
-                if (extracted.model && extracted.model !== 'Unknown' && extracted.model !== '...') {
+                if (extracted.model) {
                     modelInput.value = extracted.model;
-                    foundCount++;
+                    filledCount++;
                 }
-                if (extracted.serialNumber && extracted.serialNumber !== 'Unknown' && extracted.serialNumber !== '...') {
+                if (extracted.serialNumber) {
                     serialInput.value = extracted.serialNumber;
-                    foundCount++;
+                    filledCount++;
                 }
 
-                if (foundCount === 3) {
-                    setStatusBanner('success', 'Details extracted! Please verify the numbers below before submitting.');
-                } else if (foundCount > 0) {
-                    setStatusBanner('warning', 'Partial details detected. Please complete any missing fields manually.');
+                if (filledCount > 0) {
+                    setStatusBanner('success', 'Scan complete! Please review and fill in any missing fields.');
                 } else {
-                    setStatusBanner('warning', 'Photo was too dark or blurry to read automatically. Try retaking with flash or enter details below.');
+                    setStatusBanner('warning', 'Could not auto-detect text clearly. Please fill in details manually.');
                 }
             } catch (err) {
-                console.error(err);
-                setStatusBanner('error', 'Connection error while scanning. Please enter details manually.');
+                console.error('Tesseract Error:', err);
+                setStatusBanner('warning', 'OCR scan failed. Please enter your TV details manually.');
             }
         };
 
+        // Handle Image Upload & Compression
         stickerInput.addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            try {
-                compressedBase64Image = await processImage(file);
-                stickerPreview.src = compressedBase64Image;
-                uploadPlaceholder.classList.add('hidden');
-                previewContainer.classList.remove('hidden');
-                retryScanBtn.classList.remove('hidden');
-
-                await runAIScan(compressedBase64Image);
-            } catch (err) {
-                console.error('Image processing failed:', err);
-                setStatusBanner('error', 'Could not read image file. Please try another photo.');
-            }
-        });
-
-        retryScanBtn.addEventListener('click', () => {
-            if (compressedBase64Image) {
-                runAIScan(compressedBase64Image);
-            }
-        });
-
-        // Submit Verification Form to MongoDB
-        verifyForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            if (!compressedBase64Image) {
-                setStatusBanner('warning', 'Please upload or take a photo of your TV sticker first.');
-                return;
-            }
-
-            const originalBtnHtml = submitBtn.innerHTML;
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="ph ph-spinner-gap animate-spin text-xl"></i> Saving Verification...';
-            submitFeedback.classList.add('hidden');
-
-            try {
-                const res = await fetch('/api/submit-verification', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        brand: brandInput.value.trim(),
-                        model: modelInput.value.trim(),
-                        serial_number: serialInput.value.trim(),
-                        image: compressedBase64Image
-                    })
-                });
-
-                const result = await res.json();
-
-                if (res.ok && result.success) {
-                    submitFeedback.className = 'mt-5 p-4 rounded-xl text-sm text-center font-medium border bg-mossGreen/30 border-neonGreen text-neonGreen';
-                    submitFeedback.innerHTML = '<i class="ph-fill ph-check-circle text-lg align-middle mr-1"></i> TV label submitted and saved for verification!';
-                    verifyForm.reset();
-                    compressedBase64Image = '';
-                    previewContainer.classList.add('hidden');
-                    uploadPlaceholder.classList.remove('hidden');
-                    retryScanBtn.classList.add('hidden');
-                    scanStatus.classList.add('hidden');
-                } else {
-                    throw new Error(result.error || 'Failed to save verification.');
-                }
-            } catch (err) {
-                submitFeedback.className = 'mt-5 p-4 rounded-xl text-sm text-center font-medium border bg-red-900/30 border-red-500 text-red-300';
-                submitFeedback.textContent = err.message || 'Submission failed. Please try again.';
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = originalBtnHtml;
-            }
-        });
-    </script>
-</body>
-</html>
+            const file = e.target.
