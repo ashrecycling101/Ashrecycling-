@@ -21,8 +21,8 @@ export default async function handler(req, res) {
     const base64Data = matches[2];
 
     try {
-        const prompt = `Analyze this product sticker image. Extract the manufacturer/Brand, Model Number, and Serial Number. Return ONLY a valid JSON object in this exact format with no markdown formatting:
-        {"brand": "...", "model": "...", "serialNumber": "..."}`;
+        const prompt = `Analyze this product TV sticker image carefully. Even if the image is dark or blurry, look closely for the Brand (e.g., Sceptre, Samsung, LG, Sony), Model number, and Serial number. Return ONLY a valid JSON object in this exact format with no markdown formatting:
+{"brand": "...", "model": "...", "serialNumber": "..."}`;
 
         const response = await fetch(
             `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
