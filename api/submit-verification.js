@@ -18,7 +18,7 @@ export default async function handler(req, res) {
             brand: brand || 'Unknown',
             model: model || 'Unknown',
             serial_number: serial_number,
-            image_url: image, // Stores base64 or hosted URL
+            image_url: image,
             status: 'pending'
         });
 
@@ -30,6 +30,6 @@ export default async function handler(req, res) {
 
     } catch (error) {
         console.error('MongoDB Save Error:', error);
-        return res.status(500).json({ error: 'Internal Server Error while saving.' });
+        return res.status(500).json({ error: 'Server error while saving to database: ' + error.message });
     }
 }
