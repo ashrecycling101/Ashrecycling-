@@ -10,6 +10,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
     <!-- Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Free Browser OCR (Tesseract.js - No API Key Needed) -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -324,13 +326,13 @@
         <div class="max-w-7xl mx-auto">
             <div class="text-center mb-12">
                 <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-mossGreen/40 text-neonGreen border border-neonGreen/50 text-xs font-bold uppercase tracking-wider mb-4">
-                    <i class="ph-fill ph-barcode"></i> Photo Scan & Email Verification
+                    <i class="ph-fill ph-barcode"></i> Built-In Browser OCR & Email Verification
                 </div>
                 <h2 class="text-3xl md:text-5xl font-bold mb-4 text-white">
                     Scan TV Model & <span class="text-neonGreen neon-glow">Serial Number</span>
                 </h2>
                 <p class="text-gray-300 max-w-2xl mx-auto">
-                    Snap or upload a photo of the back sticker on your TV. AI reads the serial, model, and board codes automatically, and sends the photo link with your booking request.
+                    Snap or upload a photo of the back sticker on your TV. Our built-in OCR scanner reads the serial, model, and board codes right in your browser, and sends the photo link with your booking request.
                 </p>
             </div>
 
@@ -368,7 +370,7 @@
 
                     <div id="scanStatusBanner" class="hidden mt-4 px-4 py-3 rounded-lg text-sm font-medium bg-mossGreen/30 border border-neonGreen/50 text-neonGreen flex items-center gap-2">
                         <i id="scanStatusIcon" class="ph ph-spinner-gap animate-spin text-lg shrink-0"></i>
-                        <span id="scanStatusText">AI is reading your TV sticker...</span>
+                        <span id="scanStatusText">Scanning TV sticker text...</span>
                     </div>
 
                     <div class="mt-4 flex flex-wrap gap-3">
@@ -880,7 +882,7 @@
         const IMGBB_API_KEY = "e866be2f984c1e3d66740513b558c8b0";
         handleFormSubmit(document.getElementById('membershipForm'), document.getElementById('modal-submit-btn'), document.getElementById('modal-success'), myEndpoint);
 
-        // TV Label Scan & ImgBB Link Emailer Logic
+        // TV Label Scan (100% Free Client-Side Tesseract OCR + Smart TV Pattern Parser) & ImgBB Link Emailer
         const stickerPhotoInput = document.getElementById('stickerPhotoInput');
         const uploadPromptView = document.getElementById('uploadPromptView');
         const previewContainer = document.getElementById('previewContainer');
@@ -909,7 +911,7 @@
 
         let currentImageDataUrl = '';
 
-        const compressDataUrlToFile = (dataUrl, fileName = 'tv-sticker.jpg', maxWidth = 1280, quality = 0.85) => {
+        const compressDataUrlToFile = (dataUrl, fileName = 'tv-sticker.jpg', maxWidth = 1400, quality = 0.88) => {
             return new Promise((resolve) => {
                 const img = new Image();
                 img.onload = () => {
@@ -936,6 +938,109 @@
                 };
                 img.src = dataUrl;
             });
+        };
+
+        // Pre-process sticker image (grayscale + contrast boost) for sharper OCR reading
+        const enhanceImageForOCR = (dataUrl) => {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => {
+                    const maxW = 1600;
+                    let { width, height } = img;
+                    if (width > maxW) {
+                        height = Math.round((height * maxW) / width);
+                        width = maxW;
+                    }
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.filter = 'grayscale(100%) contrast(150%) brightness(105%)';
+                    ctx.drawImage(img, 0, 0, width, height);
+                    resolve(canvas.toDataURL('image/png'));
+                };
+                img.src = dataUrl;
+            });
+        };
+
+        // Smart TV Sticker Parser (extracts Brand, Model, Serial & Onn FD/M24054-MT patterns)
+        const extractTvDetailsFromOcrText = (rawText) => {
+            const cleanText = (rawText || '').replace(/\r/g, '\n');
+            const upper = cleanText.toUpperCase();
+
+            // 1. Detect Board / Chassis Code (e.g. M24054-MT, M24086-MT, BN41-...)
+            const boardMatch = upper.match(/\b(M\d{5}-[A-Z]{2}|BN\d{2}-[A-Z0-9-]+|EAX\d{8})\b/);
+            const boardCode = boardMatch ? boardMatch[1] : '';
+
+            // 2. Detect Serial Number (e.g. S/N: FD2403542G55000442 or generic S/N)
+            let serialNumber = '';
+            const fdSerialMatch = upper.match(/\b(FD[A-Z0-9]{10,18})\b/);
+            const labeledSerialMatch = upper.match(/(?:S\/N|SERIAL\s*(?:NO\.?|NUMBER)?)\s*[:#\-]?\s*([A-Z0-9]{8,22})/);
+            if (fdSerialMatch) {
+                serialNumber = fdSerialMatch[1];
+            } else if (labeledSerialMatch) {
+                serialNumber = labeledSerialMatch[1];
+            }
+
+            // 3. Detect Brand
+            let brand = '';
+            const knownBrands = [
+                { key: 'SAMSUNG', label: 'Samsung' },
+                { key: 'LG ELECTRONICS', label: 'LG' },
+                { key: 'SONY', label: 'Sony' },
+                { key: 'HISENSE', label: 'Hisense' },
+                { key: 'TCL', label: 'TCL' },
+                { key: 'VIZIO', label: 'Vizio' },
+                { key: 'INSIGNIA', label: 'Insignia' },
+                { key: 'TOSHIBA', label: 'Toshiba' },
+                { key: 'WESTINGHOUSE', label: 'Westinghouse' },
+                { key: 'PHILIPS', label: 'Philips' },
+                { key: 'ROKU', label: 'Roku' },
+                { key: 'ONN', label: 'Onn' }
+            ];
+            for (const b of knownBrands) {
+                if (upper.includes(b.key)) {
+                    brand = b.label;
+                    break;
+                }
+            }
+
+            // 4. Detect Model Number
+            let modelNumber = '';
+            const labeledModelMatch = upper.match(/(?:MODEL(?:\s*(?:NO\.?|CODE|NUMBER))?)\s*[:#\-]?\s*([A-Z0-9-]{5,20})/);
+            if (labeledModelMatch) {
+                modelNumber = labeledModelMatch[1];
+            } else {
+                const samsungModel = upper.match(/\b((?:UN|QN|UE|UA)\d{2}[A-Z0-9]{6,12})\b/);
+                const lgModel = upper.match(/\b(\d{2}(?:UQ|UP|UN|UM|OLED|QNED)[A-Z0-9]{4,10})\b/);
+                const onnModel = upper.match(/\b(1000\d{5})\b/);
+                if (samsungModel) modelNumber = samsungModel[1];
+                else if (lgModel) modelNumber = lgModel[1];
+                else if (onnModel) modelNumber = onnModel[1];
+            }
+
+            // 5. Onn TV Signature Rule (FD... serial or M24054-MT / M24086-MT board code)
+            let screenNotes = '';
+            if (serialNumber.startsWith('FD') || boardCode.startsWith('M24')) {
+                if (!brand) brand = 'Onn';
+                if (!modelNumber) {
+                    if (boardCode === 'M24054-MT') modelNumber = '100012587';
+                    else if (boardCode === 'M24086-MT') modelNumber = '100044717';
+                }
+                const sizeHint = boardCode === 'M24086-MT' ? '75 inch 4K TV' : '65 inch 4K TV';
+                screenNotes = boardCode ? `${sizeHint} (Board: ${boardCode})` : sizeHint;
+            } else {
+                const sizeMatch = upper.match(/\b(32|40|42|43|48|50|55|58|60|65|70|75|77|85|86)\s*(?:INCH|IN|")\b/);
+                if (sizeMatch) screenNotes = `${sizeMatch[1]} inch TV`;
+                if (boardCode) screenNotes = screenNotes ? `${screenNotes} (Board: ${boardCode})` : `Board: ${boardCode}`;
+            }
+
+            return {
+                brand,
+                modelNumber,
+                serialNumber,
+                screenSize: screenNotes
+            };
         };
 
         const uploadStickerToImgBB = async (dataUrl) => {
@@ -1014,47 +1119,45 @@
             scanLaserOverlay.classList.remove('hidden');
             scanStatusBanner.classList.remove('hidden');
             scanStatusIcon.className = 'ph ph-spinner-gap animate-spin text-lg shrink-0';
-            scanStatusText.textContent = 'AI is reading your TV sticker (model, serial & board codes)...';
+            scanStatusText.textContent = 'Reading sticker text in browser (0%)...';
             runScanBtn.disabled = true;
 
             try {
-                const compressedFile = await compressDataUrlToFile(currentImageDataUrl, 'scan.jpg', 1280, 0.85);
-                const compressedBase64 = await new Promise((resolve) => {
-                    const reader = new FileReader();
-                    reader.onload = () => resolve(reader.result);
-                    reader.readAsDataURL(compressedFile);
-                });
-
-                const res = await fetch('/api/scan-label', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ image: compressedBase64 })
-                });
-
-                const rawResponseText = await res.text();
-                let data = {};
-                try {
-                    data = JSON.parse(rawResponseText);
-                } catch (_) {
-                    throw new Error(`HTTP ${res.status} — /api/scan-label did not return JSON`);
+                if (!window.Tesseract) {
+                    throw new Error('OCR library failed to load');
                 }
 
-                if (!res.ok) {
-                    throw new Error(data.error || `HTTP ${res.status} error`);
-                }
+                const enhancedUrl = await enhanceImageForOCR(currentImageDataUrl);
+                const result = await Tesseract.recognize(enhancedUrl, 'eng', {
+                    logger: (m) => {
+                        if (m.status === 'recognizing text' && typeof m.progress === 'number') {
+                            const pct = Math.round(m.progress * 100);
+                            scanStatusText.textContent = `Reading sticker text in browser (${pct}%)...`;
+                        }
+                    }
+                });
 
-                scannedBrand.value = data.brand || '';
-                scannedScreenSize.value = data.screen_size || '';
-                scannedModel.value = data.model_number || '';
-                scannedSerial.value = data.serial_number || '';
+                const ocrText = result?.data?.text || '';
+                const parsed = extractTvDetailsFromOcrText(ocrText);
+
+                if (parsed.brand) scannedBrand.value = parsed.brand;
+                if (parsed.screenSize) scannedScreenSize.value = parsed.screenSize;
+                if (parsed.modelNumber) scannedModel.value = parsed.modelNumber;
+                if (parsed.serialNumber) scannedSerial.value = parsed.serialNumber;
 
                 syncAttachedPhotoBanner();
-                scanStatusIcon.className = 'ph-fill ph-check-circle text-lg shrink-0';
-                scanStatusText.textContent = `Recognized: ${data.brand || 'TV'} • Model ${data.model_number || 'N/A'} • Serial ${data.serial_number || 'N/A'}`;
+
+                if (parsed.brand || parsed.modelNumber || parsed.serialNumber) {
+                    scanStatusIcon.className = 'ph-fill ph-check-circle text-lg shrink-0';
+                    scanStatusText.textContent = `Recognized: ${parsed.brand || 'TV'} • Model ${parsed.modelNumber || 'Check label'} • Serial ${parsed.serialNumber || 'Check label'}`;
+                } else {
+                    scanStatusIcon.className = 'ph-fill ph-warning-circle text-amberGold text-lg shrink-0';
+                    scanStatusText.textContent = 'Photo attached! Text was too blurry to auto-read — please type Brand, Model & Serial below.';
+                }
             } catch (err) {
-                console.error('Label scan error:', err);
+                console.error('OCR scan error:', err);
                 scanStatusIcon.className = 'ph-fill ph-warning-circle text-amberGold text-lg shrink-0';
-                scanStatusText.textContent = `Scan note: ${err.message || 'Endpoint unreachable'} — you can still enter or verify fields below.`;
+                scanStatusText.textContent = 'Photo attached! Please enter or verify Brand, Model & Serial below.';
             } finally {
                 scanLaserOverlay.classList.add('hidden');
                 runScanBtn.disabled = false;
