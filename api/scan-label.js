@@ -14,7 +14,6 @@ export default async function handler(req, res) {
             return res.status(500).json({ error: 'GEMINI_API_KEY is missing in Vercel environment variables' });
         }
 
-        // Extract mime type and base64 payload from Data URL
         const match = image.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/);
         const mimeType = match ? match[1] : 'image/jpeg';
         const base64Data = match ? match[2] : image.replace(/^data:image\/\w+;base64,/, '');
@@ -24,12 +23,11 @@ Analyze this sticker image carefully and extract:
 1. "brand": The TV brand (e.g., Samsung, LG, Sony, Onn, TCL, Hisense, Vizio).
 2. "model_number": The TV model number.
 3. "serial_number": The serial number (often labeled S/N, Serial No., or under a barcode).
-4. "board_or_part_number": Any main board / chassis / part code printed on the sticker (e.g., M24054-MT, BN41-..., etc.), or empty string if none.
-5. "screen_size": Screen size or key TV notes (e.g., "65 inch 4K LED TV").
+4. "screen_size": Screen size and/or main board/part code notes (e.g., "65 inch 4K LED TV (Board: M24054-MT)").
 
 IMPORTANT IDENTIFICATION RULES FOR ONN TVs:
 - Onn (Walmart) TVs frequently have serial numbers starting with "FD" (e.g., FD2403542G55000442, FD240862V75000400) and main board / chassis numbers formatted like "M24054-MT" or "M24086-MT", even when the word "Onn" or the 9-digit model number (such as 100012587 for the 65-inch or 100044717 for the 75-inch) is not explicitly printed on that specific sticker.
-- If you see an "FD..." serial number and/or an "M24...-MT" code, identify the brand as "Onn", deduce the exact Onn 9-digit model number (e.g., "100012587" for M24054-MT / 65" class), and include the board code in screen_size notes (e.g., "65 inch 4K TV (Board: M24054-MT)").
+- If you see an "FD..." serial number and/or an "M24...-MT" code, identify the brand as "Onn", deduce the exact Onn 9-digit model number ("100012587" for M24054-MT / 65" class), and include the board code in screen_size notes (e.g., "65 inch 4K TV (Board: M24054-MT)").
 
 Return ONLY valid JSON with these exact keys:
 {
