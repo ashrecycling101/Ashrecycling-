@@ -1,7 +1,6 @@
 {
   "name": "ash-recycling",
-  "type": "module",
-  "dependencies": {
-    "mongoose": "^8.0.0"
-  }
+  "version": "1.0.0",
+  "private": true,
+  "type": "module"
 }
