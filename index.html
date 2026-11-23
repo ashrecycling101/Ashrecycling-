@@ -330,7 +330,7 @@
                     Scan TV Model & <span class="text-neonGreen neon-glow">Serial Number</span>
                 </h2>
                 <p class="text-gray-300 max-w-2xl mx-auto">
-                    Snap or upload a photo of the back sticker on your TV. When you submit your booking request below, the photo link and recognized model/serial number are sent directly to our email for verification.
+                    Snap or upload a photo of the back sticker on your TV. AI reads the serial, model, and board codes automatically, and sends the photo link with your booking request.
                 </p>
             </div>
 
@@ -367,8 +367,8 @@
                     </label>
 
                     <div id="scanStatusBanner" class="hidden mt-4 px-4 py-3 rounded-lg text-sm font-medium bg-mossGreen/30 border border-neonGreen/50 text-neonGreen flex items-center gap-2">
-                        <i class="ph ph-spinner-gap animate-spin text-lg"></i>
-                        <span id="scanStatusText">Scanning sticker for Brand, Model, and Serial Number...</span>
+                        <i id="scanStatusIcon" class="ph ph-spinner-gap animate-spin text-lg shrink-0"></i>
+                        <span id="scanStatusText">AI is reading your TV sticker...</span>
                     </div>
 
                     <div class="mt-4 flex flex-wrap gap-3">
@@ -387,29 +387,29 @@
                         <i class="ph-fill ph-check-square-offset text-amberGold"></i> 2. Auto-Filled Part Info
                     </h3>
                     <p class="text-xs text-gray-400 mb-5">
-                        Fields auto-fill after scanning. Click <strong class="text-white">Attach to Booking Request</strong> to fill the pickup form below and send the photo link with your booking.
+                        Fields auto-fill after scanning. Review or edit if needed, then click <strong class="text-white">Attach to Booking Request</strong> to send the photo link with your booking.
                     </p>
 
                     <form id="labelVerificationForm" class="space-y-4">
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label for="scannedBrand" class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">TV / Appliance Brand</label>
-                                <input type="text" id="scannedBrand" name="brand" placeholder="e.g., Samsung, LG, Sony" required class="w-full bg-obsidian border border-steelGray rounded-lg px-3.5 py-2.5 text-white text-sm focus:outline-none focus:border-neonGreen">
+                                <input type="text" id="scannedBrand" name="brand" placeholder="e.g., Onn, Samsung, LG, Sony" required class="w-full bg-obsidian border border-steelGray rounded-lg px-3.5 py-2.5 text-white text-sm focus:outline-none focus:border-neonGreen">
                             </div>
                             <div>
-                                <label for="scannedScreenSize" class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">Screen Size / Notes</label>
-                                <input type="text" id="scannedScreenSize" name="screen_size" placeholder="e.g., 55 inch LED / Main Board" class="w-full bg-obsidian border border-steelGray rounded-lg px-3.5 py-2.5 text-white text-sm focus:outline-none focus:border-neonGreen">
+                                <label for="scannedScreenSize" class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">Screen Size / Board Notes</label>
+                                <input type="text" id="scannedScreenSize" name="screen_size" placeholder="e.g., 65 inch 4K TV (Board: M24054-MT)" class="w-full bg-obsidian border border-steelGray rounded-lg px-3.5 py-2.5 text-white text-sm focus:outline-none focus:border-neonGreen">
                             </div>
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label for="scannedModel" class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">Model Number</label>
-                                <input type="text" id="scannedModel" name="model_number" placeholder="e.g., UN55TU8000FXZA" required class="w-full bg-obsidian border border-steelGray rounded-lg px-3.5 py-2.5 text-white text-sm font-mono focus:outline-none focus:border-neonGreen">
+                                <input type="text" id="scannedModel" name="model_number" placeholder="e.g., 100012587" required class="w-full bg-obsidian border border-steelGray rounded-lg px-3.5 py-2.5 text-white text-sm font-mono focus:outline-none focus:border-neonGreen">
                             </div>
                             <div>
                                 <label for="scannedSerial" class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">Serial Number</label>
-                                <input type="text" id="scannedSerial" name="serial_number" placeholder="e.g., 04K73CNM901482" required class="w-full bg-obsidian border border-steelGray rounded-lg px-3.5 py-2.5 text-white text-sm font-mono focus:outline-none focus:border-neonGreen">
+                                <input type="text" id="scannedSerial" name="serial_number" placeholder="e.g., FD2403542G55000442" required class="w-full bg-obsidian border border-steelGray rounded-lg px-3.5 py-2.5 text-white text-sm font-mono focus:outline-none focus:border-neonGreen">
                             </div>
                         </div>
 
@@ -888,6 +888,7 @@
         const scanLaserOverlay = document.getElementById('scanLaserOverlay');
         const scanFileName = document.getElementById('scanFileName');
         const scanStatusBanner = document.getElementById('scanStatusBanner');
+        const scanStatusIcon = document.getElementById('scanStatusIcon');
         const scanStatusText = document.getElementById('scanStatusText');
         const runScanBtn = document.getElementById('runScanBtn');
         const clearScanBtn = document.getElementById('clearScanBtn');
@@ -908,7 +909,7 @@
 
         let currentImageDataUrl = '';
 
-        const compressDataUrlToFile = (dataUrl, fileName = 'tv-sticker.jpg', maxWidth = 1280, quality = 0.82) => {
+        const compressDataUrlToFile = (dataUrl, fileName = 'tv-sticker.jpg', maxWidth = 1280, quality = 0.85) => {
             return new Promise((resolve) => {
                 const img = new Image();
                 img.onload = () => {
@@ -966,38 +967,18 @@
             ctx.strokeRect(14, 14, canvas.width - 28, canvas.height - 28);
             ctx.fillStyle = '#0f172a';
             ctx.font = 'bold 28px Inter, sans-serif';
-            ctx.fillText('SAMSUNG ELECTRONICS - SPEC LABEL', 38, 66);
+            ctx.fillText('ONN 65" 4K UHD LED TV - SPEC LABEL', 38, 66);
             ctx.font = 'bold 24px monospace';
-            ctx.fillText('MODEL CODE : UN55TU8000FXZA', 38, 128);
-            ctx.fillText('SERIAL NO. : 04K73CNM901482', 38, 174);
+            ctx.fillText('MODEL NO.  : 100012587', 38, 128);
+            ctx.fillText('SERIAL NO. : FD2403542G55000442', 38, 174);
             ctx.font = '600 20px Inter, sans-serif';
-            ctx.fillText('SIZE: 55 INCH LED TV | 120V ~ 60Hz', 38, 224);
+            ctx.fillText('BOARD: M24054-MT | VESA: 400x300mm', 38, 224);
             ctx.fillStyle = '#111827';
             for (let x = 38; x < 580; x += 8) {
                 const w = (x % 16 === 0) ? 4 : 2;
                 ctx.fillRect(x, 255, w, 58);
             }
             return canvas.toDataURL('image/png');
-        };
-
-        const parseStickerFromFileName = (name) => {
-            const upper = (name || '').toUpperCase();
-            let brand = 'Samsung';
-            if (upper.includes('LG')) brand = 'LG';
-            else if (upper.includes('SONY')) brand = 'Sony';
-            else if (upper.includes('TCL')) brand = 'TCL';
-            else if (upper.includes('HISENSE')) brand = 'Hisense';
-            else if (upper.includes('VIZIO')) brand = 'Vizio';
-
-            const modelMatch = upper.match(/[A-Z]{2,4}\d{2}[A-Z0-9]{4,10}/);
-            const serialMatch = upper.match(/SN[A-Z0-9]{6,14}|SER[A-Z0-9]{6,14}/);
-
-            return {
-                brand,
-                screenSize: upper.includes('65') ? '65 inch TV' : upper.includes('50') ? '50 inch TV' : '55 inch TV',
-                modelNumber: modelMatch ? modelMatch[0] : 'UN55TU8000FXZA',
-                serialNumber: serialMatch ? serialMatch[0].replace(/^(SN|SER)/, '') : '04K73CNM901482'
-            };
         };
 
         const syncAttachedPhotoBanner = () => {
@@ -1027,46 +1008,51 @@
         const runLabelRecognition = async () => {
             if (!currentImageDataUrl) {
                 const sampleUrl = createSampleStickerDataUrl();
-                displayPreviewImage(sampleUrl, 'sample-tv-sticker.png');
+                displayPreviewImage(sampleUrl, 'sample-onn-100012587-sticker.png');
             }
 
             scanLaserOverlay.classList.remove('hidden');
             scanStatusBanner.classList.remove('hidden');
-            scanStatusText.textContent = 'Reading sticker text & barcode data...';
+            scanStatusIcon.className = 'ph ph-spinner-gap animate-spin text-lg shrink-0';
+            scanStatusText.textContent = 'AI is reading your TV sticker (model, serial & board codes)...';
             runScanBtn.disabled = true;
 
-            let extracted = parseStickerFromFileName(scanFileName.textContent);
-
             try {
+                const compressedFile = await compressDataUrlToFile(currentImageDataUrl, 'scan.jpg', 1280, 0.85);
+                const compressedBase64 = await new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.readAsDataURL(compressedFile);
+                });
+
                 const res = await fetch('/api/scan-label', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ image: currentImageDataUrl, fileName: scanFileName.textContent })
+                    body: JSON.stringify({ image: compressedBase64 })
                 });
-                if (res.ok) {
-                    const data = await res.json();
-                    extracted = {
-                        brand: data.brand || extracted.brand,
-                        screenSize: data.screen_size || data.screenSize || extracted.screenSize,
-                        modelNumber: data.model_number || data.modelNumber || extracted.modelNumber,
-                        serialNumber: data.serial_number || data.serialNumber || extracted.serialNumber
-                    };
-                }
-            } catch (_) {
-                // Fallback parser if /api/scan-label is not active yet
-            }
 
-            setTimeout(() => {
-                scannedBrand.value = extracted.brand;
-                scannedScreenSize.value = extracted.screenSize;
-                scannedModel.value = extracted.modelNumber;
-                scannedSerial.value = extracted.serialNumber;
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(data.error || 'Scanner API unavailable');
+                }
+
+                scannedBrand.value = data.brand || '';
+                scannedScreenSize.value = data.screen_size || '';
+                scannedModel.value = data.model_number || '';
+                scannedSerial.value = data.serial_number || '';
 
                 syncAttachedPhotoBanner();
+                scanStatusIcon.className = 'ph-fill ph-check-circle text-lg shrink-0';
+                scanStatusText.textContent = `Recognized: ${data.brand || 'TV'} • Model ${data.model_number || 'N/A'} • Serial ${data.serial_number || 'N/A'}`;
+            } catch (err) {
+                console.error('Label scan error:', err);
+                scanStatusIcon.className = 'ph-fill ph-warning-circle text-amberGold text-lg shrink-0';
+                scanStatusText.textContent = 'Photo attached! AI scanner endpoint is offline — please verify or enter Brand, Model & Serial below.';
+            } finally {
                 scanLaserOverlay.classList.add('hidden');
-                scanStatusText.textContent = `Recognized: ${extracted.brand} • Model ${extracted.modelNumber} • Serial ${extracted.serialNumber}`;
                 runScanBtn.disabled = false;
-            }, 900);
+            }
         };
 
         stickerPhotoInput.addEventListener('change', (e) => {
@@ -1082,7 +1068,7 @@
 
         loadSampleStickerBtn.addEventListener('click', () => {
             const sampleUrl = createSampleStickerDataUrl();
-            displayPreviewImage(sampleUrl, 'sample-samsung-un55tu8000-sticker.png');
+            displayPreviewImage(sampleUrl, 'sample-onn-100012587-sticker.png');
             runLabelRecognition();
         });
 
@@ -1102,6 +1088,10 @@
 
         clearScanBtn.addEventListener('click', clearAllScanState);
         removeAttachedPhotoBtn.addEventListener('click', clearAllScanState);
+
+        [scannedBrand, scannedModel, scannedSerial].forEach((inputEl) => {
+            inputEl.addEventListener('input', syncAttachedPhotoBanner);
+        });
 
         const applyScannedToBooking = (shouldScroll = true) => {
             const brand = scannedBrand.value.trim();
